@@ -12,8 +12,8 @@
     <script>
         const clientId = "767b285b46a5456bb19d3e9e04052285";
 
-        // ⚠️ Debe coincidir exactamente con lo configurado en Spotify Dashboard
-        const redirectUri = "https://acholyp-arch.github.io/Agenda/call-back.html";
+        // 🔥 DEBE COINCIDIR EXACTAMENTE CON SPOTIFY DASHBOARD
+        const redirectUri = "https://acholyp-arch.github.io/Agenda/callback.html";
 
         async function getToken(code) {
             const codeVerifier = localStorage.getItem("code_verifier");
@@ -46,14 +46,15 @@
             const tokenData = await getToken(code);
 
             if (tokenData.error) {
-                document.body.innerHTML = "Error al obtener token: " + tokenData.error;
+                document.body.innerHTML = "Error al obtener token: " + tokenData.error_description;
+                console.error(tokenData);
                 return;
             }
 
             // Guardar token
             localStorage.setItem("access_token", tokenData.access_token);
 
-            // Redirigir de vuelta al calendario (ruta correcta de GH Pages)
+            // Redirigir de vuelta al index del calendario
             window.location.href = "https://acholyp-arch.github.io/Agenda/";
         }
 
