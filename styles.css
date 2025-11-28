@@ -1,61 +1,103 @@
-/* Layout de 3 columnas */
-.container {
-    display: grid;
-    grid-template-columns: 1fr 1.4fr 1fr;
-    gap: 20px;
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f3f3f3;
+    display: flex;
+}
+
+header {
     padding: 20px;
+    width: 100%;
+    text-align: center;
 }
 
-/* Estilos de cada columna */
-.column {
-    background: #fff;
+h1 {
+    margin-bottom: 5px;
+}
+
+#currentMonth {
+    margin: 0;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+/* Barra izquierda */
+#taskSidebar {
+    width: 250px;
+    background: white;
     padding: 20px;
-    border-radius: 10px;
+    border-right: 1px solid #ddd;
+    height: 100vh;
+    overflow-y: auto;
 }
 
-/* Ajustes visuales */
-.left, .right {
-    background: #f7f7f7;
+#taskSidebar ul {
+    padding: 0;
+    list-style: none;
 }
 
-.center {
-    background: #ffffff;
+#taskSidebar li {
+    background: #eee;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 6px;
 }
 
 /* Calendario */
-#calendar-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+#calendarContainer {
+    width: 75%;
+    max-width: 750px;
+    margin: auto;
 }
 
 #calendar {
-    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.day {
+    padding: 15px;
+    background: #fafafa;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #0006;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    width: 350px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.closeBtn {
+    margin-top: 15px;
+    padding: 8px 15px;
+    cursor: pointer;
 }
 
 /* Spotify */
-#spotifyContainer {
+#spotifySection {
+    margin: 40px auto;
+    text-align: center;
+}
+
+#spotifyPlayer iframe {
     margin-top: 20px;
-}
-
-/* Tareas */
-.task {
-    margin-bottom: 10px;
-}
-
-.task-header {
-    font-weight: bold;
-    cursor: pointer;
-}
-.task-details {
-    margin-left: 20px;
-    display: none;
-}
-.task-details.open {
-    display: block;
-}
-
-.completed {
-    opacity: 0.5;
-    text-decoration: line-through;
+    width: 320px;
+    height: 380px;
+    border-radius: 12px;
 }
