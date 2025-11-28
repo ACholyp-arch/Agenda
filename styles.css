@@ -2,11 +2,13 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     background: #f3f3f3;
-    text-align: center;
+    display: flex;
 }
 
 header {
     padding: 20px;
+    width: 100%;
+    text-align: center;
 }
 
 h1 {
@@ -19,21 +21,33 @@ h1 {
     font-weight: bold;
 }
 
-.nav-btns button {
-    margin: 5px;
-    padding: 8px 16px;
-    font-size: 15px;
-    cursor: pointer;
-}
-
-#calendarContainer {
-    width: 80%;
-    max-width: 700px;
-    margin: 30px auto;
+/* Barra izquierda */
+#taskSidebar {
+    width: 250px;
     background: white;
     padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 0 10px #0002;
+    border-right: 1px solid #ddd;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+#taskSidebar ul {
+    padding: 0;
+    list-style: none;
+}
+
+#taskSidebar li {
+    background: #eee;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+}
+
+/* Calendario */
+#calendarContainer {
+    width: 75%;
+    max-width: 750px;
+    margin: auto;
 }
 
 #calendar {
@@ -50,47 +64,40 @@ h1 {
     cursor: pointer;
 }
 
-.day:hover {
-    background: #e8e8e8;
-}
-
-.week-view {
-    display: flex;
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #0006;
     justify-content: center;
-    gap: 15px;
+    align-items: center;
 }
 
-.week-day {
-    padding: 15px;
-    background: #fff;
-    border: 1px solid #ccc;
-    width: 120px;
-    border-radius: 10px;
+.modal-content {
+    background: white;
+    padding: 20px;
+    width: 350px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.closeBtn {
+    margin-top: 15px;
+    padding: 8px 15px;
+    cursor: pointer;
 }
 
 /* Spotify */
 #spotifySection {
-    margin-top: 40px;
-}
-
-#spotifyInput {
-    width: 60%;
-    max-width: 450px;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #bbb;
-    margin-bottom: 10px;
-}
-
-#loadSpotify {
-    padding: 10px 20px;
-    border-radius: 10px;
-    cursor: pointer;
+    margin: 40px auto;
+    text-align: center;
 }
 
 #spotifyPlayer iframe {
     margin-top: 20px;
-    width: 300px;
+    width: 320px;
     height: 380px;
     border-radius: 12px;
 }
