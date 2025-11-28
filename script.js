@@ -4,8 +4,18 @@ const monthViewBtn = document.getElementById("monthViewBtn");
 const todayBtn = document.getElementById("todayBtn");
 const nextMonthBtn = document.getElementById("nextMonth");
 const prevMonthBtn = document.getElementById("prevMonth");
+const currentMonthText = document.getElementById("currentMonth");
+
+const spotifyInput = document.getElementById("spotifyInput");
+const loadSpotifyBtn = document.getElementById("loadSpotify");
+const spotifyPlayer = document.getElementById("spotifyPlayer");
 
 let currentDate = new Date();
+
+const months = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+];
 
 function renderCalendar() {
     calendarElement.innerHTML = "";
@@ -15,10 +25,11 @@ function renderCalendar() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
+    currentMonthText.innerText = `${months[month]} ${year}`;
+
     const firstDay = new Date(year, month, 1).getDay();
     const lastDay = new Date(year, month + 1, 0).getDate();
 
-    // Encabezado de días
     const daysOfWeek = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
     daysOfWeek.forEach(d => {
         const header = document.createElement("div");
@@ -27,14 +38,12 @@ function renderCalendar() {
         calendarElement.appendChild(header);
     });
 
-    // Espacios vacíos
     for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement("div");
         empty.className = "day empty";
         calendarElement.appendChild(empty);
     }
 
-    // Días del mes
     for (let day = 1; day <= lastDay; day++) {
         const dayDiv = document.createElement("div");
         dayDiv.className = "day";
@@ -69,29 +78,44 @@ function renderWeekView() {
     calendarElement.appendChild(weekContainer);
 }
 
-// Botones
 weekViewBtn.onclick = () => renderWeekView();
-
-monthViewBtn.onclick = () => {
-    renderCalendar();
-};
-
+monthViewBtn.onclick = () => renderCalendar();
 todayBtn.onclick = () => {
     currentDate = new Date();
     renderCalendar();
 };
 
-// Mes siguiente
 nextMonthBtn.onclick = () => {
     currentDate.setMonth(currentDate.getMonth() + 1);
     renderCalendar();
 };
 
-// Mes anterior
 prevMonthBtn.onclick = () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendar();
 };
 
-// Inicial
+// Spotify
+loadSpotifyBtn.onclick = () => {
+    const url = spotifyInput.value.trim();
+
+    if (!url.includes("spotify")) {
+        alert("Por favor pega un enlace válido de Spotify.");
+        return;
+    }
+
+    // Convertir URL normal a embed
+    const embedUrl = url
+        .replace("open.spotify.com/", "open.spotify.com/embed/")
+        .split("?")[0];
+
+    spotifyPlayer.innerHTML = `
+        <iframe 
+            src="${embedUrl}" 
+            frameborder="0" 
+            allow="encrypted-media">
+        </iframe>
+    `;
+};
+
 renderCalendar();
