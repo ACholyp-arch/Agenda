@@ -6,59 +6,25 @@
 </head>
 <body>
     <p style="font-family: Arial; text-align:center; margin-top:50px;">
-        Conectando con Spotify, por favor espera...
+        Conectando con Spotify...
     </p>
 
     <script>
-        const clientId = "767b285b46a5456bb19d3e9e04052285";
+        // Spotify redirige aquí con el token en el hash (#)
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get("access_token");
 
-        // 🔥 DEBE COINCIDIR EXACTAMENTE CON SPOTIFY DASHBOARD
-        const redirectUri = "https://acholyp-arch.github.io/Agenda/callback.html";
+        if (!accessToken) {
+            document.body.innerHTML = "<h2>Error: No se recibió el token de Spotify.</h2>";
+        } else {
+            // Guardamos el token
+            localStorage.setItem("access_token", accessToken);
 
-        async function getToken(code) {
-            const codeVerifier = localStorage.getItem("code_verifier");
-
-            const data = new URLSearchParams();
-            data.append("client_id", clientId);
-            data.append("grant_type", "authorization_code");
-            data.append("code", code);
-            data.append("redirect_uri", redirectUri);
-            data.append("code_verifier", codeVerifier);
-
-            const response = await fetch("https://accounts.spotify.com/api/token", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: data,
-            });
-
-            return await response.json();
+            // Regresamos a la app
+            window.location.href = "index.html";
         }
-
-        async function main() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get("code");
-
-            if (!code) {
-                document.body.innerHTML = "Error: no se recibió el código de autorización.";
-                return;
-            }
-
-            const tokenData = await getToken(code);
-
-            if (tokenData.error) {
-                document.body.innerHTML = "Error al obtener token: " + tokenData.error_description;
-                console.error(tokenData);
-                return;
-            }
-
-            // Guardar token
-            localStorage.setItem("access_token", tokenData.access_token);
-
-            // Redirigir de vuelta al index del calendario
-            window.location.href = "https://acholyp-arch.github.io/Agenda/";
-        }
-
-        main();
     </script>
+
 </body>
 </html>
