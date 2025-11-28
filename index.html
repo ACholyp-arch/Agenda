@@ -1,41 +1,63 @@
-<div class="container">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ser o no ser</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
 
-    <!-- COLUMNA IZQUIERDA – TAREAS -->
-    <div class="column left">
-        <h2>Tareas de hoy</h2>
+    <aside id="taskSidebar">
+        <h3>Tareas del día</h3>
+        <ul id="taskListToday"></ul>
+    </aside>
 
-        <div id="tasks-container">
-            <!-- Aquí se cargan tus tareas dinámicamente -->
-        </div>
-    </div>
-
-    <!-- COLUMNA CENTRAL – CALENDARIO -->
-    <div class="column center">
+    <header>
         <h1>Ser o no ser</h1>
+        <h2 id="currentMonth"></h2>
 
-        <div id="calendar-header">
+        <div class="nav-btns">
+            <button id="prevMonth">◀</button>
             <button id="todayBtn">Hoy</button>
-            <button id="prevBtn">◀</button>
-            <button id="nextBtn">▶</button>
-            <h2 id="monthYear"></h2>
+            <button id="nextMonth">▶</button>
+            <button id="weekViewBtn">Vista Semanal</button>
+            <button id="monthViewBtn" style="display:none;">Vista Mensual</button>
         </div>
+    </header>
 
+    <div id="calendarContainer">
         <div id="calendar"></div>
+    </div>
 
-        <div id="view-buttons">
-            <button id="monthView">Vista mensual</button>
-            <button id="weekView">Vista semanal</button>
+    <!-- Modal para agregar tareas -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalDateTitle"></h3>
+            <input id="taskInput" type="text" placeholder="Escribe una tarea...">
+            <button id="addTaskBtn">Agregar tarea</button>
+
+            <ul id="taskListForDay"></ul>
+
+            <button class="closeBtn" id="closeModal">Cerrar</button>
         </div>
     </div>
 
-    <!-- COLUMNA DERECHA – SPOTIFY -->
-    <div class="column right">
-        <h3>Agregar música</h3>
+    <!-- Spotify -->
+    <section id="spotifySection">
+        <h3>Mi música</h3>
 
-        <input type="text" id="spotifyLink" placeholder="Pega tu link de Spotify">
-        <button id="loadBtn">Cargar</button>
+        <input 
+            type="text" 
+            id="spotifyInput" 
+            placeholder="Pega un enlace de Spotify"
+        >
 
-        <div id="spotifyContainer"></div>
-    </div>
+        <button id="loadSpotify">Cargar Spotify</button>
 
-</div>
+        <div id="spotifyPlayer"></div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
