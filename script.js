@@ -6,16 +6,31 @@ const nextMonthBtn = document.getElementById("nextMonth");
 const prevMonthBtn = document.getElementById("prevMonth");
 const currentMonthText = document.getElementById("currentMonth");
 
-const spotifyInput = document.getElementById("spotifyInput");
-const loadSpotifyBtn = document.getElementById("loadSpotify");
-const spotifyPlayer = document.getElementById("spotifyPlayer");
+const sidebarList = document.getElementById("taskListToday");
+
+const taskModal = document.getElementById("taskModal");
+const taskInput = document.getElementById("taskInput");
+const addTaskBtn = document.getElementById("addTaskBtn");
+const taskListForDay = document.getElementById("taskListForDay");
+const modalDateTitle = document.getElementById("modalDateTitle");
+const closeModal = document.getElementById("closeModal");
 
 let currentDate = new Date();
+let selectedDay = null;
+
+// Guardar tareas: { "2025-02-28": ["Hacer tarea", "Ir al gym"] }
+let tasks = JSON.parse(localStorage.getItem("tasks")) || {};
+
+function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
 
 const months = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+    "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
 ];
+
+/* -------------------------- RENDER CALENDARIO -------------------------- */
 
 function renderCalendar() {
     calendarElement.innerHTML = "";
@@ -30,7 +45,8 @@ function renderCalendar() {
     const firstDay = new Date(year, month, 1).getDay();
     const lastDay = new Date(year, month + 1, 0).getDate();
 
-    const daysOfWeek = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+    // Días semana
+    const daysOfWeek = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
     daysOfWeek.forEach(d => {
         const header = document.createElement("div");
         header.className = "day header";
@@ -38,48 +54,86 @@ function renderCalendar() {
         calendarElement.appendChild(header);
     });
 
+    // Espacios vacíos
     for (let i = 0; i < firstDay; i++) {
-        const empty = document.createElement("div");
-        empty.className = "day empty";
-        calendarElement.appendChild(empty);
+        calendarElement.appendChild(document.createElement("div"));
     }
 
+    // Días
     for (let day = 1; day <= lastDay; day++) {
         const dayDiv = document.createElement("div");
         dayDiv.className = "day";
         dayDiv.innerText = day;
+
+        dayDiv.onclick = () => openDayModal(year, month, day);
+
         calendarElement.appendChild(dayDiv);
     }
 }
 
-function renderWeekView() {
-    calendarElement.innerHTML = "";
+/* -------------------------- MODAL DE TAREAS --------------------------- */
 
-    weekViewBtn.style.display = "none";
-    monthViewBtn.style.display = "inline-block";
+function openDayModal(year, month, day) {
+    selectedDay = `${year}-${month+1}-${day}`;
 
-    const weekContainer = document.createElement("div");
-    weekContainer.classList.add("week-view");
+    modalDateTitle.innerText = `Tareas del ${day} de ${months[month]}`;
+    taskInput.value = "";
+    taskListForDay.innerHTML = "";
 
-    const startOfWeek = new Date(currentDate);
-    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+    const list = tasks[selectedDay] || [];
 
-    for (let i = 0; i < 7; i++) {
-        const temp = new Date(startOfWeek);
-        temp.setDate(startOfWeek.getDate() + i);
-        
-        const div = document.createElement("div");
-        div.className = "week-day";
-        div.innerHTML = `<strong>${temp.toDateString().slice(0, 3)}</strong><br>${temp.getDate()}`;
-        
-        weekContainer.appendChild(div);
-    }
+    list.forEach((t, index) => {
+        const li = document.createElement("li");
+        li.innerText = t;
 
-    calendarElement.appendChild(weekContainer);
+        li.onclick = () => {
+            list.splice(index, 1);
+            tasks[selectedDay] = list;
+            saveTasks();
+            openDayModal(year, month, day);
+            updateSidebar();
+        };
+
+        taskListForDay.appendChild(li);
+    });
+
+    taskModal.style.display = "flex";
 }
 
-weekViewBtn.onclick = () => renderWeekView();
-monthViewBtn.onclick = () => renderCalendar();
+addTaskBtn.onclick = () => {
+    if (!taskInput.value.trim()) return;
+
+    if (!tasks[selectedDay]) tasks[selectedDay] = [];
+
+    tasks[selectedDay].push(taskInput.value.trim());
+    saveTasks();
+
+    taskInput.value = "";
+    openDayModal(...selectedDay.split("-").map(Number)); 
+    updateSidebar();
+};
+
+closeModal.onclick = () => taskModal.style.display = "none";
+
+/* -------------------------- SIDEBAR --------------------------- */
+
+function updateSidebar() {
+    const today = new Date();
+    const key = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+
+    sidebarList.innerHTML = "";
+
+    if (!tasks[key]) return;
+
+    tasks[key].forEach(t => {
+        const li = document.createElement("li");
+        li.innerText = t;
+        sidebarList.appendChild(li);
+    });
+}
+
+/* -------------------------- NAV --------------------------- */
+
 todayBtn.onclick = () => {
     currentDate = new Date();
     renderCalendar();
@@ -95,27 +149,25 @@ prevMonthBtn.onclick = () => {
     renderCalendar();
 };
 
-// Spotify
-loadSpotifyBtn.onclick = () => {
-    const url = spotifyInput.value.trim();
+/* -------------------------- SPOTIFY --------------------------- */
+
+document.getElementById("loadSpotify").onclick = () => {
+    let url = document.getElementById("spotifyInput").value.trim();
 
     if (!url.includes("spotify")) {
-        alert("Por favor pega un enlace válido de Spotify.");
+        alert("Enlace inválido");
         return;
     }
 
-    // Convertir URL normal a embed
-    const embedUrl = url
-        .replace("open.spotify.com/", "open.spotify.com/embed/")
-        .split("?")[0];
+    url = url.replace("https://open.spotify.com/intl-es/", "https://open.spotify.com/");
+    const embed = url.replace("open.spotify.com/", "open.spotify.com/embed/").split("?")[0];
 
-    spotifyPlayer.innerHTML = `
-        <iframe 
-            src="${embedUrl}" 
-            frameborder="0" 
-            allow="encrypted-media">
-        </iframe>
+    document.getElementById("spotifyPlayer").innerHTML = `
+        <iframe src="${embed}" frameborder="0" allow="encrypted-media"></iframe>
     `;
 };
 
+/* -------------------------- INICIO --------------------------- */
+
 renderCalendar();
+updateSidebar();
