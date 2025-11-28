@@ -101,3 +101,26 @@ h1 {
     height: 380px;
     border-radius: 12px;
 }
+.task-completed {
+    opacity: 0.4;
+    text-decoration: line-through;
+}
+
+.subtask {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.subtask input[type="checkbox"] {
+    transform: scale(1.2);
+}
+
+.task-item {
+    padding: 8px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    color: black;
+    font-weight: 600;
+}
