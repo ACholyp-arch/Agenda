@@ -284,7 +284,8 @@ updateCurrentSpotify();
 // ================================
 
 const clientId = "767b285b46a5456bb19d3e9e04052285";
-const redirectUri = "https://acholyp-arch.github.io/Agenda/call-back/";
+const redirectUri = "https://acholyp-arch.github.io/Agenda/callback.html";
+
 
 async function generateCodeVerifier(length) {
     let text = '';
