@@ -284,59 +284,45 @@ updateCurrentSpotify();
 // ================================
 
 const clientId = "767b285b46a5456bb19d3e9e04052285";
-const redirectUri = "https://acholyp-arch.github.io/Agenda/call-back";
+const redirectUri = "https://acholyp-arch.github.io/Agenda/call-back/";
 
-// ---- Generate Random Code Verifier ----
-function generateRandomString(length) {
-    let text = "";
-    const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+async function generateCodeVerifier(length) {
+    let text = '';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
     for (let i = 0; i < length; i++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
     return text;
 }
 
-// ---- SHA256 ----
-async function sha256(plain) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(plain);
-    return await crypto.subtle.digest("SHA-256", data);
+async function generateCodeChallenge(codeVerifier) {
+    const data = new TextEncoder().encode(codeVerifier);
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(digest)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+    return base64;
 }
 
-function base64urlencode(buffer) {
-    const bytes = new Uint8Array(buffer);
-    let binary = "";
-    bytes.forEach(b => binary += String.fromCharCode(b));
-    return btoa(binary)
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/, "");
+async function redirectToSpotifyAuth() {
+    const codeVerifier = await generateCodeVerifier(128);
+    const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+    localStorage.setItem("code_verifier", codeVerifier);
+
+    const authUrl = new URL("https://accounts.spotify.com/authorize");
+    authUrl.searchParams.append("client_id", clientId);
+    authUrl.searchParams.append("response_type", "code");
+    authUrl.searchParams.append("redirect_uri", redirectUri);
+    authUrl.searchParams.append("code_challenge_method", "S256");
+    authUrl.searchParams.append("code_challenge", codeChallenge);
+    authUrl.searchParams.append("scope", "user-read-currently-playing user-read-playback-state");
+
+    window.location.href = authUrl.toString();
 }
 
-// ----- Main login function -----
-async function loginWithSpotify() {
-    const codeVerifier = generateRandomString(128);
-    localStorage.setItem("spotify_code_verifier", codeVerifier);
-
-    const hash = await sha256(codeVerifier);
-    const codeChallenge = base64urlencode(hash);
-
-    const scope = [
-        "user-read-playback-state",
-        "user-read-currently-playing"
-    ].join(" ");
-
-    const args = new URLSearchParams({
-        response_type: "code",
-        client_id: clientId,
-        scope: scope,
-        code_challenge_method: "S256",
-        code_challenge: codeChallenge,
-        redirect_uri: redirectUri
-    });
-
-    window.location = "https://accounts.spotify.com/authorize?" + args;
-}
+window.spotifyLogin = redirectToSpotifyAuth;
 
 // ======================================
 //    SPOTIFY NOW PLAYING (REAL TIME)
