@@ -9,52 +9,19 @@
 <body>
 
     <header>
-        <h1>Agenda Personal Interactiva</h1>
+        <h1>Mi Agenda</h1>
 
-        <div id="viewButtons">
-            <button onclick="showMonthly()">Vista Mensual</button>
-            <button onclick="showWeekly()">Vista Semanal</button>
+        <div class="nav-btns">
+            <button id="prevMonth">◀</button>
+            <button id="todayBtn">Hoy</button>
+            <button id="nextMonth">▶</button>
+            <button id="weekViewBtn">Vista Semanal</button>
+            <button id="monthViewBtn" style="display:none;">Vista Mensual</button>
         </div>
-
-        <div id="backgroundUpload">
-            <label>Subir fondo:</label>
-            <input type="file" id="bgInput" accept="image/*">
-        </div>
-
-        <div id="spotifyBox">
-            <label>Spotify Embed:</label>
-            <input type="text" id="spotifyInput" placeholder="Pega aquí tu link embed">
-            <button onclick="loadSpotify()">Cargar</button>
-        </div>
-        <div id="spotifyPlayer"></div>
     </header>
 
-    <!-- Calendario mensual -->
-    <h2 id="monthTitle"></h2>
-    <div id="calendar" class="calendar"></div>
-
-    <!-- Vista semanal -->
-    <div id="weekView" class="week hidden"></div>
-
-    <!-- Modal para eventos -->
-    <div id="eventModal" class="modal hidden">
-        <div class="modalContent">
-            <h3 id="modalDate"></h3>
-
-            <label>Descripción:</label>
-            <textarea id="eventText"></textarea>
-
-            <label>Color del evento:</label>
-            <input type="color" id="eventColor">
-
-            <label><input type="checkbox" id="isTask"> Es una tarea</label>
-
-            <label>Recordatorio:</label>
-            <input type="datetime-local" id="eventReminder">
-
-            <button onclick="saveEvent()">Guardar</button>
-            <button onclick="closeModal()">Cerrar</button>
-        </div>
+    <div id="calendarContainer">
+        <div id="calendar"></div>
     </div>
 
     <script src="script.js"></script>
