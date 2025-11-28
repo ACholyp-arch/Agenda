@@ -8,10 +8,14 @@
 </head>
 <body>
 
+    <aside id="taskSidebar">
+        <h3>Tareas del día</h3>
+        <ul id="taskListToday"></ul>
+    </aside>
+
     <header>
         <h1>Ser o no ser</h1>
-
-        <h2 id="currentMonth"></h2> <!-- Mes agregado -->
+        <h2 id="currentMonth"></h2>
 
         <div class="nav-btns">
             <button id="prevMonth">◀</button>
@@ -26,14 +30,27 @@
         <div id="calendar"></div>
     </div>
 
-    <!-- Sección Spotify -->
+    <!-- Modal para agregar tareas -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalDateTitle"></h3>
+            <input id="taskInput" type="text" placeholder="Escribe una tarea...">
+            <button id="addTaskBtn">Agregar tarea</button>
+
+            <ul id="taskListForDay"></ul>
+
+            <button class="closeBtn" id="closeModal">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Spotify -->
     <section id="spotifySection">
         <h3>Mi música</h3>
 
         <input 
             type="text" 
             id="spotifyInput" 
-            placeholder="Pega aquí un enlace de Spotify (álbum, playlist o canción)"
+            placeholder="Pega un enlace de Spotify"
         >
 
         <button id="loadSpotify">Cargar Spotify</button>
