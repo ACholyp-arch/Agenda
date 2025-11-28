@@ -9,6 +9,16 @@ header {
     padding: 20px;
 }
 
+h1 {
+    margin-bottom: 5px;
+}
+
+#currentMonth {
+    margin: 0;
+    font-size: 26px;
+    font-weight: bold;
+}
+
 .nav-btns button {
     margin: 5px;
     padding: 8px 16px;
@@ -18,7 +28,7 @@ header {
 
 #calendarContainer {
     width: 80%;
-    max-width: 700px;  /* CALENDARIO MÁS PEQUEÑO */
+    max-width: 700px;
     margin: 30px auto;
     background: white;
     padding: 20px;
@@ -56,4 +66,31 @@ header {
     border: 1px solid #ccc;
     width: 120px;
     border-radius: 10px;
+}
+
+/* Spotify */
+#spotifySection {
+    margin-top: 40px;
+}
+
+#spotifyInput {
+    width: 60%;
+    max-width: 450px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #bbb;
+    margin-bottom: 10px;
+}
+
+#loadSpotify {
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#spotifyPlayer iframe {
+    margin-top: 20px;
+    width: 300px;
+    height: 380px;
+    border-radius: 12px;
 }
