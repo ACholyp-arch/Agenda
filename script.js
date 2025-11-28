@@ -19,7 +19,11 @@ let currentDate = new Date();
 let selectedDay = null;
 
 // Guardar tareas: { "2025-02-28": ["Hacer tarea", "Ir al gym"] }
-let tasks = JSON.parse(localStorage.getItem("tasks")) || {};
+let tasks = JSON.parse(localStorage.getItem("tasks")) || {}; 
+// Nueva forma:
+// tasks["2025-02-28"] = [
+//    { text:"Ir al gym", color:"#aabbcc", subtasks:[{text:"meter ropa", done:false}] }
+// ]
 
 function saveTasks() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -105,12 +109,93 @@ addTaskBtn.onclick = () => {
 
     if (!tasks[selectedDay]) tasks[selectedDay] = [];
 
-    tasks[selectedDay].push(taskInput.value.trim());
+    const newTask = {
+        text: taskInput.value.trim(),
+        color: document.getElementById("taskColor").value,
+        subtasks: []
+    };
+
+    tasks[selectedDay].push(newTask);
     saveTasks();
 
     taskInput.value = "";
-    openDayModal(...selectedDay.split("-").map(Number)); 
+    renderTaskModal(selectedDay);
     updateSidebar();
+};
+
+function renderTaskModal(dateKey) {
+    const [year, month, day] = dateKey.split("-").map(Number);
+    modalDateTitle.innerText = `Tareas del ${day} de ${months[month - 1]}`;
+    taskInput.value = "";
+    taskListForDay.innerHTML = "";
+    subtaskList.innerHTML = "";
+
+    const list = tasks[dateKey] || [];
+
+    list.forEach((task, taskIndex) => {
+        const li = document.createElement("li");
+        li.classList.add("task-item");
+        li.style.backgroundColor = task.color;
+        li.innerHTML = `<strong>${task.text}</strong>`;
+        
+        // Contenedor de subtareas
+        const ulSub = document.createElement("ul");
+
+        task.subtasks.forEach((sub, subIndex) => {
+            const subLi = document.createElement("li");
+            subLi.className = "subtask";
+
+            const chk = document.createElement("input");
+            chk.type = "checkbox";
+            chk.checked = sub.done;
+
+            chk.onchange = () => {
+                task.subtasks[subIndex].done = chk.checked;
+                saveTasks();
+                checkTaskCompleted(task, li);
+                updateSidebar();
+            };
+
+            subLi.appendChild(chk);
+            subLi.appendChild(document.createTextNode(sub.text));
+            ulSub.appendChild(subLi);
+        });
+
+        li.appendChild(ulSub);
+
+        li.onclick = () => {
+            tasks[dateKey].splice(taskIndex, 1);
+            saveTasks();
+            renderTaskModal(dateKey);
+            updateSidebar();
+        };
+
+        checkTaskCompleted(task, li);
+        taskListForDay.appendChild(li);
+    });
+
+    taskModal.style.display = "flex";
+}
+
+function checkTaskCompleted(task, element) {
+    if (task.subtasks.length > 0 && task.subtasks.every(s => s.done)) {
+        element.classList.add("task-completed");
+    } else {
+        element.classList.remove("task-completed");
+    }
+}
+
+addSubtaskBtn.onclick = () => {
+    const text = prompt("Escribe una subtarea:");
+    if (!text) return;
+
+    if (!tasks[selectedDay]) return;
+
+    const lastTask = tasks[selectedDay][tasks[selectedDay].length - 1];
+    lastTask.subtasks.push({ text, done:false });
+
+    saveTasks();
+    renderTaskModal(selectedDay);
 };
 
 closeModal.onclick = () => taskModal.style.display = "none";
@@ -149,6 +234,7 @@ prevMonthBtn.onclick = () => {
     renderCalendar();
 };
 
+
 /* -------------------------- SPOTIFY --------------------------- */
 
 document.getElementById("loadSpotify").onclick = () => {
@@ -168,6 +254,30 @@ document.getElementById("loadSpotify").onclick = () => {
 };
 
 /* -------------------------- INICIO --------------------------- */
+
+async function updateCurrentSpotify() {
+    const token = "AQUÍ TU TOKEN"; // ← reemplazar
+
+    const resp = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (!resp.ok) return;
+
+    const data = await resp.json();
+
+    const track = data.item;
+
+    document.getElementById("spotifyPlayer").innerHTML = `
+        <p><strong>Reproduciendo ahora:</strong></p>
+        <p>${track.name} — ${track.artists[0].name}</p>
+        <img src="${track.album.images[0].url}" width="200" style="border-radius:12px;">
+    `;
+}
+
+// Actualizar cada 20s
+setInterval(updateCurrentSpotify, 20000);
+updateCurrentSpotify();
 
 renderCalendar();
 updateSidebar();
