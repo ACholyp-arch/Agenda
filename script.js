@@ -279,5 +279,145 @@ async function updateCurrentSpotify() {
 setInterval(updateCurrentSpotify, 20000);
 updateCurrentSpotify();
 
+// ================================
+//    SPOTIFY AUTH (PKCE FLOW)
+// ================================
+
+const clientId = "767b285b46a5456bb19d3e9e04052285";
+const redirectUri = "https://acholyp-arch.github.io/Agenda/call-back";
+
+// ---- Generate Random Code Verifier ----
+function generateRandomString(length) {
+    let text = "";
+    const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (let i = 0; i < length; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+}
+
+// ---- SHA256 ----
+async function sha256(plain) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(plain);
+    return await crypto.subtle.digest("SHA-256", data);
+}
+
+function base64urlencode(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary)
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+}
+
+// ----- Main login function -----
+async function loginWithSpotify() {
+    const codeVerifier = generateRandomString(128);
+    localStorage.setItem("spotify_code_verifier", codeVerifier);
+
+    const hash = await sha256(codeVerifier);
+    const codeChallenge = base64urlencode(hash);
+
+    const scope = [
+        "user-read-playback-state",
+        "user-read-currently-playing"
+    ].join(" ");
+
+    const args = new URLSearchParams({
+        response_type: "code",
+        client_id: clientId,
+        scope: scope,
+        code_challenge_method: "S256",
+        code_challenge: codeChallenge,
+        redirect_uri: redirectUri
+    });
+
+    window.location = "https://accounts.spotify.com/authorize?" + args;
+}
+
+// ======================================
+//    SPOTIFY NOW PLAYING (REAL TIME)
+// ======================================
+
+async function getAccessToken(code) {
+    const codeVerifier = localStorage.getItem("spotify_code_verifier");
+
+    const body = new URLSearchParams({
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: redirectUri,
+        client_id: clientId,
+        code_verifier: codeVerifier
+    });
+
+    const res = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body
+    });
+
+    return await res.json();
+}
+
+async function refreshNowPlaying() {
+    const token = localStorage.getItem("spotify_access_token");
+    if (!token) return;
+
+    const res = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
+        headers: { Authorization: "Bearer " + token }
+    });
+
+    if (res.status === 204) {
+        document.getElementById("nowPlaying").innerHTML = "<p>No estás escuchando nada.</p>";
+        return;
+    }
+
+    const data = await res.json();
+    if (!data || !data.item) return;
+
+    const song = data.item.name;
+    const artist = data.item.artists.map(a => a.name).join(", ");
+    const cover = data.item.album.images[0].url;
+
+    document.getElementById("nowPlaying").innerHTML = `
+        <img src="${cover}" style="width:120px;border-radius:10px;">
+        <p><strong>${song}</strong></p>
+        <p>${artist}</p>
+    `;
+}
+
+// ---- Detect callback and save token ----
+async function handleSpotifyCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+
+    if (code) {
+        const tokenData = await getAccessToken(code);
+
+        localStorage.setItem("spotify_access_token", tokenData.access_token);
+
+        window.history.replaceState({}, document.title, "index.html");
+
+        refreshNowPlaying();
+        setInterval(refreshNowPlaying, 5000);
+    }
+}
+
+// Ejecutar si hay callback
+handleSpotifyCallback();
+
+// Actualizar si ya hay token
+if (localStorage.getItem("spotify_access_token")) {
+    refreshNowPlaying();
+    setInterval(refreshNowPlaying, 5000);
+}
+
+document.getElementById("connectSpotify").onclick = () => {
+    loginWithSpotify();
+};
+
 renderCalendar();
 updateSidebar();
