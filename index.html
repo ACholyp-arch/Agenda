@@ -1,86 +1,41 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ser o no ser</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<div class="container">
 
-<div class="layout">
-
-    <!-- SIDEBAR IZQUIERDA -->
-    <aside class="sidebar">
+    <!-- COLUMNA IZQUIERDA – TAREAS -->
+    <div class="column left">
         <h2>Tareas de hoy</h2>
-        <ul id="todayTasks"></ul>
 
-        <h3>Música</h3>
-        <input type="text" id="spotifyInput" placeholder="Pega tu link de Spotify">
-        <button onclick="loadSpotify()">Cargar música</button>
-
-        <div id="spotifyPlayer"></div>
-    </aside>
-
-    <!-- CONTENIDO PRINCIPAL -->
-    <main class="main">
-
-        <h1 class="title">Ser o no ser</h1>
-
-        <!-- MES Y CONTROLES -->
-        <div class="month-header">
-            <button onclick="prevMonth()">◀</button>
-            <h2 id="currentMonth"></h2>
-            <button onclick="nextMonth()">▶</button>
+        <div id="tasks-container">
+            <!-- Aquí se cargan tus tareas dinámicamente -->
         </div>
-
-        <h3 id="selectedDate" class="selected-date"></h3>
-
-        <!-- BOTONES DE VISTA -->
-        <div class="view-switch">
-            <button onclick="showMonthView()">Vista mensual</button>
-            <button onclick="showWeekView()">Vista semanal</button>
-            <button onclick="goToday()">Hoy</button>
-        </div>
-
-        <!-- CALENDARIO -->
-        <div id="calendar" class="calendar"></div>
-
-        <!-- VISTA SEMANAL -->
-        <div id="weekView" class="week hidden"></div>
-
-        <!-- TAREAS DEL DÍA -->
-        <section>
-            <h3>Tareas de este día</h3>
-            <button onclick="openTaskModal()" class="add-btn">Agregar tarea</button>
-            <ul id="taskList"></ul>
-        </section>
-
-    </main>
-</div>
-
-<!-- MODAL PARA NUEVAS TAREAS -->
-<div id="taskModal" class="modal hidden">
-    <div class="modal-content">
-        <h3>Nueva tarea</h3>
-
-        <label>Título</label>
-        <input type="text" id="taskTitle">
-
-        <label>Color</label>
-        <input type="color" id="taskColor" value="#3498db">
-
-        <label>Subtareas</label>
-        <div id="subtaskContainer"></div>
-        <button onclick="addSubtask()">+ Subtarea</button>
-
-        <br><br>
-        <button onclick="saveTask()">Guardar</button>
-        <button onclick="closeTaskModal()">Cancelar</button>
     </div>
+
+    <!-- COLUMNA CENTRAL – CALENDARIO -->
+    <div class="column center">
+        <h1>Ser o no ser</h1>
+
+        <div id="calendar-header">
+            <button id="todayBtn">Hoy</button>
+            <button id="prevBtn">◀</button>
+            <button id="nextBtn">▶</button>
+            <h2 id="monthYear"></h2>
+        </div>
+
+        <div id="calendar"></div>
+
+        <div id="view-buttons">
+            <button id="monthView">Vista mensual</button>
+            <button id="weekView">Vista semanal</button>
+        </div>
+    </div>
+
+    <!-- COLUMNA DERECHA – SPOTIFY -->
+    <div class="column right">
+        <h3>Agregar música</h3>
+
+        <input type="text" id="spotifyLink" placeholder="Pega tu link de Spotify">
+        <button id="loadBtn">Cargar</button>
+
+        <div id="spotifyContainer"></div>
+    </div>
+
 </div>
-
-<script src="script.js"></script>
-
-</body>
-</html>
