@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda Personal</title>
+    <title>Ser o no ser</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
     <header>
-        <h1>Mi Agenda</h1>
+        <h1>Ser o no ser</h1>
+
+        <h2 id="currentMonth"></h2> <!-- Mes agregado -->
 
         <div class="nav-btns">
             <button id="prevMonth">◀</button>
@@ -23,6 +25,21 @@
     <div id="calendarContainer">
         <div id="calendar"></div>
     </div>
+
+    <!-- Sección Spotify -->
+    <section id="spotifySection">
+        <h3>Mi música</h3>
+
+        <input 
+            type="text" 
+            id="spotifyInput" 
+            placeholder="Pega aquí un enlace de Spotify (álbum, playlist o canción)"
+        >
+
+        <button id="loadSpotify">Cargar Spotify</button>
+
+        <div id="spotifyPlayer"></div>
+    </section>
 
     <script src="script.js"></script>
 </body>
