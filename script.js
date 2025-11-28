@@ -328,69 +328,73 @@ window.spotifyLogin = redirectToSpotifyAuth;
 //    SPOTIFY NOW PLAYING (REAL TIME)
 // ======================================
 
-async function getAccessToken(code) {
-    const codeVerifier = localStorage.getItem("spotify_code_verifier");
-
-    const body = new URLSearchParams({
-        grant_type: "authorization_code",
-        code: code,
-        redirect_uri: redirectUri,
-        client_id: clientId,
-        code_verifier: codeVerifier
-    });
-
-    const res = await fetch("https://accounts.spotify.com/api/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body
-    });
-
-    return await res.json();
+async function getAccessToken() {
+    return localStorage.getItem("access_token");
 }
 
-async function refreshNowPlaying() {
-    const token = localStorage.getItem("spotify_access_token");
+function formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    return `${minutes}:${seconds}`;
+}
+
+async function fetchNowPlaying() {
+    const token = await getAccessToken();
     if (!token) return;
 
-    const res = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
-        headers: { Authorization: "Bearer " + token }
-    });
+    try {
+        const response = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
-    if (res.status === 204) {
-        document.getElementById("nowPlaying").innerHTML = "<p>No estás escuchando nada.</p>";
-        return;
+        if (response.status === 204) {
+            document.getElementById("spotify-info").innerHTML =
+                "<p>No estás escuchando nada ahorita.</p>";
+            return;
+        }
+
+        const data = await response.json();
+        const track = data.item;
+
+        const progress = data.progress_ms;
+        const duration = track.duration_ms;
+        const percentage = (progress / duration) * 100;
+
+        document.getElementById("spotify-info").innerHTML = `
+            <div class="now-playing-container">
+                <img src="${track.album.images[0].url}" class="album-cover">
+
+                <div class="track-info">
+                    <h3>${track.name}</h3>
+                    <p>${track.artists.map(a => a.name).join(", ")}</p>
+
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div 
+                                class="progress-fill" 
+                                style="width:${percentage}%">
+                            </div>
+                        </div>
+
+                        <div class="progress-times">
+                            <span>${formatTime(progress)}</span>
+                            <span>${formatTime(duration)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error("Error obteniendo Spotify Now Playing:", error);
     }
-
-    const data = await res.json();
-    if (!data || !data.item) return;
-
-    const song = data.item.name;
-    const artist = data.item.artists.map(a => a.name).join(", ");
-    const cover = data.item.album.images[0].url;
-
-    document.getElementById("nowPlaying").innerHTML = `
-        <img src="${cover}" style="width:120px;border-radius:10px;">
-        <p><strong>${song}</strong></p>
-        <p>${artist}</p>
-    `;
 }
 
-// ---- Detect callback and save token ----
-async function handleSpotifyCallback() {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-
-    if (code) {
-        const tokenData = await getAccessToken(code);
-
-        localStorage.setItem("spotify_access_token", tokenData.access_token);
-
-        window.history.replaceState({}, document.title, "index.html");
-
-        refreshNowPlaying();
-        setInterval(refreshNowPlaying, 5000);
-    }
-}
+// Actualizar más frecuente para animar la barra
+setInterval(fetchNowPlaying, 1000);
 
 // Ejecutar si hay callback
 handleSpotifyCallback();
