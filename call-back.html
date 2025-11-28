@@ -1,6 +1,3 @@
-<script src="spotify-auth.js"></script>
-<script src="spotify-now-playing.js"></script>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,8 +5,14 @@
     <title>Conectando Spotify...</title>
 </head>
 <body>
+    <p style="font-family: Arial; text-align:center; margin-top:50px;">
+        Conectando con Spotify, por favor espera...
+    </p>
+
     <script>
         const clientId = "767b285b46a5456bb19d3e9e04052285";
+
+        // ⚠️ Debe coincidir exactamente con lo configurado en Spotify Dashboard
         const redirectUri = "https://acholyp-arch.github.io/Agenda/call-back/";
 
         async function getToken(code) {
@@ -36,14 +39,21 @@
             const code = urlParams.get("code");
 
             if (!code) {
-                document.body.innerHTML = "Error: no code recibido.";
+                document.body.innerHTML = "Error: no se recibió el código de autorización.";
                 return;
             }
 
             const tokenData = await getToken(code);
 
+            if (tokenData.error) {
+                document.body.innerHTML = "Error al obtener token: " + tokenData.error;
+                return;
+            }
+
+            // Guardar token
             localStorage.setItem("access_token", tokenData.access_token);
 
+            // Redirigir de vuelta al calendario (ruta correcta de GH Pages)
             window.location.href = "https://acholyp-arch.github.io/Agenda/";
         }
 
