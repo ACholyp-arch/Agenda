@@ -1,0 +1,90 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-size: cover;
+    background-position: center;
+}
+
+header {
+    background: rgba(255,255,255,0.8);
+    padding: 15px;
+    text-align: center;
+    backdrop-filter: blur(6px);
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    padding: 20px;
+}
+
+.day {
+    background: rgba(255,255,255,0.7);
+    border-radius: 8px;
+    padding: 12px;
+    min-height: 70px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.day:hover {
+    background: rgba(200,220,255,0.9);
+}
+
+.week {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.weekDay {
+    background: rgba(255,255,255,0.7);
+    padding: 15px;
+    border-radius: 8px;
+    flex: 1;
+    margin: 5px;
+}
+
+.eventBubble {
+    padding: 5px;
+    border-radius: 5px;
+    margin-top: 5px;
+    color: white;
+    font-size: 0.85em;
+}
+
+.taskDone {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden { display: none; }
+
+.modalContent {
+    background: white;
+    padding: 20px;
+    width: 300px;
+    border-radius: 10px;
+}
+
+/* Spotify */
+#spotifyPlayer iframe {
+    width: 300px;
+    height: 380px;
+    margin-top: 10px;
+}
