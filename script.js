@@ -1,3 +1,9 @@
+/* ================================
+   CALENDARIO, TAREAS y SPOTIFY
+   Archivo unificado y corregido
+   ================================ */
+
+/* -------------------------- SELECTORES -------------------------- */
 const calendarElement = document.getElementById("calendar");
 const weekViewBtn = document.getElementById("weekViewBtn");
 const monthViewBtn = document.getElementById("monthViewBtn");
@@ -15,15 +21,16 @@ const taskListForDay = document.getElementById("taskListForDay");
 const modalDateTitle = document.getElementById("modalDateTitle");
 const closeModal = document.getElementById("closeModal");
 
+// elementos opcionales (si existen en tu HTML se usarán)
+const taskColorInput = document.getElementById("taskColor"); // puede no existir
+const addSubtaskBtn = document.getElementById("addSubtaskBtn"); // puede no existir
+const subtaskList = document.getElementById("subtaskList"); // puede no existir
+
 let currentDate = new Date();
 let selectedDay = null;
 
-// Guardar tareas: { "2025-02-28": ["Hacer tarea", "Ir al gym"] }
-let tasks = JSON.parse(localStorage.getItem("tasks")) || {}; 
-// Nueva forma:
-// tasks["2025-02-28"] = [
-//    { text:"Ir al gym", color:"#aabbcc", subtasks:[{text:"meter ropa", done:false}] }
-// ]
+// Estructura: tasks["YYYY-M-D"] = [{ text, color, subtasks:[{text,done}] }, ...]
+let tasks = JSON.parse(localStorage.getItem("tasks")) || {};
 
 function saveTasks() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -37,14 +44,15 @@ const months = [
 /* -------------------------- RENDER CALENDARIO -------------------------- */
 
 function renderCalendar() {
+    if (!calendarElement) return;
     calendarElement.innerHTML = "";
-    monthViewBtn.style.display = "none";
-    weekViewBtn.style.display = "inline-block";
+    if (monthViewBtn) monthViewBtn.style.display = "none";
+    if (weekViewBtn) weekViewBtn.style.display = "inline-block";
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
-    currentMonthText.innerText = `${months[month]} ${year}`;
+    if (currentMonthText) currentMonthText.innerText = `${months[month]} ${year}`;
 
     const firstDay = new Date(year, month, 1).getDay();
     const lastDay = new Date(year, month + 1, 0).getDate();
@@ -60,7 +68,9 @@ function renderCalendar() {
 
     // Espacios vacíos
     for (let i = 0; i < firstDay; i++) {
-        calendarElement.appendChild(document.createElement("div"));
+        const blank = document.createElement("div");
+        blank.className = "day blank";
+        calendarElement.appendChild(blank);
     }
 
     // Días
@@ -77,132 +87,172 @@ function renderCalendar() {
 
 /* -------------------------- MODAL DE TAREAS --------------------------- */
 
-function openDayModal(year, month, day) {
-    selectedDay = `${year}-${month+1}-${day}`;
-
-    modalDateTitle.innerText = `Tareas del ${day} de ${months[month]}`;
-    taskInput.value = "";
-    taskListForDay.innerHTML = "";
-
-    const list = tasks[selectedDay] || [];
-
-    list.forEach((t, index) => {
-        const li = document.createElement("li");
-        li.innerText = t;
-
-        li.onclick = () => {
-            list.splice(index, 1);
-            tasks[selectedDay] = list;
-            saveTasks();
-            openDayModal(year, month, day);
-            updateSidebar();
-        };
-
-        taskListForDay.appendChild(li);
-    });
-
-    taskModal.style.display = "flex";
+function formatDateKey(year, monthZeroBased, day) {
+    // llamamos con monthZeroBased para consistencia interna
+    return `${year}-${monthZeroBased + 1}-${day}`;
 }
 
-addTaskBtn.onclick = () => {
-    if (!taskInput.value.trim()) return;
+function openDayModal(year, monthZeroBased, day) {
+    selectedDay = formatDateKey(year, monthZeroBased, day);
 
-    if (!tasks[selectedDay]) tasks[selectedDay] = [];
+    if (modalDateTitle) modalDateTitle.innerText = `Tareas del ${day} de ${months[monthZeroBased]}`;
+    if (taskInput) taskInput.value = "";
+    if (taskListForDay) taskListForDay.innerHTML = "";
+    if (subtaskList) subtaskList.innerHTML = "";
 
-    const newTask = {
-        text: taskInput.value.trim(),
-        color: document.getElementById("taskColor").value,
-        subtasks: []
-    };
-
-    tasks[selectedDay].push(newTask);
-    saveTasks();
-
-    taskInput.value = "";
     renderTaskModal(selectedDay);
-    updateSidebar();
-};
+}
 
 function renderTaskModal(dateKey) {
-    const [year, month, day] = dateKey.split("-").map(Number);
-    modalDateTitle.innerText = `Tareas del ${day} de ${months[month - 1]}`;
-    taskInput.value = "";
+    if (!taskListForDay || !modalDateTitle) return;
+
+    const [year, monthStr, dayStr] = dateKey.split("-").map(Number);
+    const monthIndex = monthStr - 1;
+    modalDateTitle.innerText = `Tareas del ${dayStr} de ${months[monthIndex]}`;
+    if (taskInput) taskInput.value = "";
     taskListForDay.innerHTML = "";
-    subtaskList.innerHTML = "";
+    if (subtaskList) subtaskList.innerHTML = "";
 
     const list = tasks[dateKey] || [];
 
     list.forEach((task, taskIndex) => {
         const li = document.createElement("li");
         li.classList.add("task-item");
-        li.style.backgroundColor = task.color;
-        li.innerHTML = `<strong>${task.text}</strong>`;
-        
-        // Contenedor de subtareas
-        const ulSub = document.createElement("ul");
+        li.style.backgroundColor = task.color || "#eee";
+        li.style.cursor = "default";
 
-        task.subtasks.forEach((sub, subIndex) => {
-            const subLi = document.createElement("li");
-            subLi.className = "subtask";
+        // Título + eliminar pequeño botón
+        const titleWrap = document.createElement("div");
+        titleWrap.style.display = "flex";
+        titleWrap.style.justifyContent = "space-between";
+        titleWrap.style.alignItems = "center";
 
-            const chk = document.createElement("input");
-            chk.type = "checkbox";
-            chk.checked = sub.done;
+        const title = document.createElement("strong");
+        title.innerText = task.text;
+        titleWrap.appendChild(title);
 
-            chk.onchange = () => {
-                task.subtasks[subIndex].done = chk.checked;
-                saveTasks();
-                checkTaskCompleted(task, li);
-                updateSidebar();
-            };
-
-            subLi.appendChild(chk);
-            subLi.appendChild(document.createTextNode(sub.text));
-            ulSub.appendChild(subLi);
-        });
-
-        li.appendChild(ulSub);
-
-        li.onclick = () => {
+        const delBtn = document.createElement("button");
+        delBtn.innerText = "Eliminar";
+        delBtn.style.marginLeft = "8px";
+        delBtn.onclick = (e) => {
+            e.stopPropagation();
             tasks[dateKey].splice(taskIndex, 1);
+            if (tasks[dateKey].length === 0) delete tasks[dateKey];
             saveTasks();
             renderTaskModal(dateKey);
             updateSidebar();
         };
+        titleWrap.appendChild(delBtn);
 
-        checkTaskCompleted(task, li);
+        li.appendChild(titleWrap);
+
+        // Contenedor de subtareas
+        const ulSub = document.createElement("ul");
+        if (task.subtasks && task.subtasks.length > 0) {
+            task.subtasks.forEach((sub, subIndex) => {
+                const subLi = document.createElement("li");
+                subLi.className = "subtask";
+
+                const chk = document.createElement("input");
+                chk.type = "checkbox";
+                chk.checked = !!sub.done;
+
+                chk.onchange = (ev) => {
+                    ev.stopPropagation();
+                    task.subtasks[subIndex].done = chk.checked;
+                    saveTasks();
+                    checkTaskCompleted(task, li, dateKey, taskIndex);
+                    updateSidebar();
+                };
+
+                subLi.appendChild(chk);
+
+                const span = document.createElement("span");
+                span.innerText = sub.text;
+                span.style.marginLeft = "8px";
+                subLi.appendChild(span);
+
+                ulSub.appendChild(subLi);
+            });
+        }
+
+        li.appendChild(ulSub);
+
+        checkTaskCompleted(task, li, dateKey, taskIndex);
         taskListForDay.appendChild(li);
     });
 
-    taskModal.style.display = "flex";
+    if (taskModal) taskModal.style.display = "flex";
 }
 
-function checkTaskCompleted(task, element) {
-    if (task.subtasks.length > 0 && task.subtasks.every(s => s.done)) {
+function checkTaskCompleted(task, element, dateKey, taskIndex) {
+    if (!task || !element) return;
+    const allDone = task.subtasks && task.subtasks.length > 0 && task.subtasks.every(s => s.done);
+    if (allDone) {
         element.classList.add("task-completed");
+        // opcional: hacer menos visible en sidebar (no eliminamos automáticamente, solo marcamos)
+        // si querés eliminarla completamente, descomenta:
+        // tasks[dateKey].splice(taskIndex, 1); saveTasks(); renderTaskModal(dateKey); updateSidebar();
     } else {
         element.classList.remove("task-completed");
     }
 }
 
-addSubtaskBtn.onclick = () => {
-    const text = prompt("Escribe una subtarea:");
-    if (!text) return;
+/* -------------------------- BOTONES TAREAS --------------------------- */
 
-    if (!tasks[selectedDay]) return;
+if (addTaskBtn) {
+    addTaskBtn.onclick = () => {
+        if (!selectedDay) return alert("Seleccioná primero un día en el calendario.");
+        if (!taskInput.value.trim()) return;
 
-    const lastTask = tasks[selectedDay][tasks[selectedDay].length - 1];
-    lastTask.subtasks.push({ text, done:false });
+        if (!tasks[selectedDay]) tasks[selectedDay] = [];
 
-    saveTasks();
-    renderTaskModal(selectedDay);
-};
+        const color = taskColorInput ? taskColorInput.value : randomPastelColor();
 
-closeModal.onclick = () => taskModal.style.display = "none";
+        const newTask = {
+            text: taskInput.value.trim(),
+            color: color,
+            subtasks: []
+        };
+
+        tasks[selectedDay].push(newTask);
+        saveTasks();
+
+        taskInput.value = "";
+        renderTaskModal(selectedDay);
+        updateSidebar();
+    };
+}
+
+if (addSubtaskBtn) {
+    addSubtaskBtn.onclick = () => {
+        if (!selectedDay) return alert("Seleccioná primero un día.");
+        const text = prompt("Escribe una subtarea:");
+        if (!text) return;
+
+        if (!tasks[selectedDay] || tasks[selectedDay].length === 0) {
+            // si no hay tareas, crea una tarea vacía para añadir la subtarea
+            const color = taskColorInput ? taskColorInput.value : randomPastelColor();
+            tasks[selectedDay] = [{ text: "Nueva tarea", color, subtasks: [] }];
+        }
+
+        const lastTaskIndex = tasks[selectedDay].length - 1;
+        tasks[selectedDay][lastTaskIndex].subtasks.push({ text, done: false });
+        saveTasks();
+        renderTaskModal(selectedDay);
+        updateSidebar();
+    };
+}
+
+if (closeModal) {
+    closeModal.onclick = () => taskModal.style.display = "none";
+}
 
 /* -------------------------- SIDEBAR --------------------------- */
 
 function updateSidebar() {
+    if (!sidebarList) return;
+
     const today = new Date();
     const key = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
 
@@ -212,105 +262,74 @@ function updateSidebar() {
 
     tasks[key].forEach(t => {
         const li = document.createElement("li");
-        li.innerText = t;
+        li.innerText = t.text || t; // si estructura antigua, mostrar texto directamente
         sidebarList.appendChild(li);
     });
 }
 
 /* -------------------------- NAV --------------------------- */
 
-todayBtn.onclick = () => {
-    currentDate = new Date();
-    renderCalendar();
-};
+if (todayBtn) todayBtn.onclick = () => { currentDate = new Date(); renderCalendar(); };
+if (nextMonthBtn) nextMonthBtn.onclick = () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); };
+if (prevMonthBtn) prevMonthBtn.onclick = () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); };
 
-nextMonthBtn.onclick = () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar();
-};
+/* -------------------------- UTILIDADES --------------------------- */
 
-prevMonthBtn.onclick = () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    renderCalendar();
-};
-
-
-/* -------------------------- SPOTIFY --------------------------- */
-
-document.getElementById("loadSpotify").onclick = () => {
-    let url = document.getElementById("spotifyInput").value.trim();
-
-    if (!url.includes("spotify")) {
-        alert("Enlace inválido");
-        return;
-    }
-
-    url = url.replace("https://open.spotify.com/intl-es/", "https://open.spotify.com/");
-    const embed = url.replace("open.spotify.com/", "open.spotify.com/embed/").split("?")[0];
-
-    document.getElementById("spotifyPlayer").innerHTML = `
-        <iframe src="${embed}" frameborder="0" allow="encrypted-media"></iframe>
-    `;
-};
-
-/* -------------------------- INICIO --------------------------- */
-
-async function updateCurrentSpotify() {
-    const token = "AQUÍ TU TOKEN"; // ← reemplazar
-
-    const resp = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
-        headers: { "Authorization": "Bearer " + token }
-    });
-
-    if (!resp.ok) return;
-
-    const data = await resp.json();
-
-    const track = data.item;
-
-    document.getElementById("spotifyPlayer").innerHTML = `
-        <p><strong>Reproduciendo ahora:</strong></p>
-        <p>${track.name} — ${track.artists[0].name}</p>
-        <img src="${track.album.images[0].url}" width="200" style="border-radius:12px;">
-    `;
+function randomPastelColor() {
+    // genera un color pastel simple
+    const r = Math.round((Math.random() * 127) + 120);
+    const g = Math.round((Math.random() * 127) + 120);
+    const b = Math.round((Math.random() * 127) + 120);
+    return `rgb(${r}, ${g}, ${b})`;
 }
 
-// Actualizar cada 20s
-setInterval(updateCurrentSpotify, 20000);
-updateCurrentSpotify();
+/* -------------------------- SPOTIFY (PKCE) --------------------------- */
 
-// ================================
-//    SPOTIFY AUTH (PKCE FLOW)
-// ================================
+/*
+  Nota:
+  - callback real en tu repo ahora: /Agenda/callback.html
+  - clientId ya lo tenés: 767b285b46a5456bb19d3e9e04052285
+  - la función handleSpotifyCallback obtiene el code, pide el token y guarda access_token en localStorage (key: access_token)
+*/
 
 const clientId = "767b285b46a5456bb19d3e9e04052285";
-const redirectUri = "https://acholyp-arch.github.io/Agenda/callback.html";
+const redirectUri = "https://acholyp-arch.github.io/Agenda/callback.html"; // coincide con Spotify Dashboard
 
-
-async function generateCodeVerifier(length) {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-    for (let i = 0; i < length; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
+// Generadores PKCE
+function generateRandomString(length = 64) {
+    const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let text = "";
+    for (let i = 0; i < length; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
     return text;
 }
 
-async function generateCodeChallenge(codeVerifier) {
-    const data = new TextEncoder().encode(codeVerifier);
-    const digest = await crypto.subtle.digest("SHA-256", data);
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(digest)))
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
-    return base64;
+async function sha256(plain) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(plain);
+    const hash = await crypto.subtle.digest("SHA-256", data);
+    return new Uint8Array(hash);
 }
 
-async function redirectToSpotifyAuth() {
-    const codeVerifier = await generateCodeVerifier(128);
-    const codeChallenge = await generateCodeChallenge(codeVerifier);
+function base64urlencode(buffer) {
+    // Convertimos a base64 URL-safe
+    let str = "";
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) str += String.fromCharCode(bytes[i]);
+    return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
 
-    localStorage.setItem("code_verifier", codeVerifier);
+async function buildCodeChallenge(verifier) {
+    const hashed = await sha256(verifier);
+    return base64urlencode(hashed);
+}
+
+// Lanzar login (adjuntar a botón)
+async function loginWithSpotify() {
+    const codeVerifier = generateRandomString(128);
+    localStorage.setItem("spotify_code_verifier", codeVerifier);
+    const codeChallenge = await buildCodeChallenge(codeVerifier);
+
+    const scope = ["user-read-currently-playing", "user-read-playback-state"].join(" ");
 
     const authUrl = new URL("https://accounts.spotify.com/authorize");
     authUrl.searchParams.append("client_id", clientId);
@@ -318,19 +337,64 @@ async function redirectToSpotifyAuth() {
     authUrl.searchParams.append("redirect_uri", redirectUri);
     authUrl.searchParams.append("code_challenge_method", "S256");
     authUrl.searchParams.append("code_challenge", codeChallenge);
-    authUrl.searchParams.append("scope", "user-read-currently-playing user-read-playback-state");
+    authUrl.searchParams.append("scope", scope);
 
     window.location.href = authUrl.toString();
 }
 
-window.spotifyLogin = redirectToSpotifyAuth;
+window.loginWithSpotify = loginWithSpotify; // accesible si usás onclick en HTML
 
-// ======================================
-//    SPOTIFY NOW PLAYING (REAL TIME)
-// ======================================
+// Intercambiar code por token (esto corre en callback.html)
+async function exchangeCodeForToken(code) {
+    const codeVerifier = localStorage.getItem("spotify_code_verifier");
+    const body = new URLSearchParams({
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: redirectUri,
+        client_id: clientId,
+        code_verifier: codeVerifier
+    });
 
-async function getAccessToken() {
-    return localStorage.getItem("access_token");
+    const res = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString()
+    });
+
+    return res.json();
+}
+
+// Manejar callback (si estás en callback.html, se ejecutará desde ahí)
+// Para evitar error si se ejecuta en index, protegemos:
+async function handleSpotifyCallbackInThisPage() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get("code");
+        if (!code) return;
+        // intercambiar por token
+        const tokenData = await exchangeCodeForToken(code);
+        if (tokenData.error) {
+            console.error("Error token:", tokenData);
+            return;
+        }
+        localStorage.setItem("access_token", tokenData.access_token);
+        // redirigir a la raíz del proyecto (subir un nivel)
+        window.location.href = "../";
+    } catch (err) {
+        console.error("Callback error:", err);
+    }
+}
+
+// Si estamos en callback.html ejecutamos el handler
+if (location.pathname.endsWith("/callback.html")) {
+    // Ejecutar para intercambiar code -> token
+    handleSpotifyCallbackInThisPage();
+}
+
+/* -------------------------- SPOTIFY: NOW PLAYING --------------------------- */
+
+function getStoredAccessToken() {
+    return localStorage.getItem("access_token") || null;
 }
 
 function formatTime(ms) {
@@ -341,45 +405,61 @@ function formatTime(ms) {
 }
 
 async function fetchNowPlaying() {
-    const token = await getAccessToken();
-    if (!token) return;
+    const token = getStoredAccessToken();
+    if (!token) {
+        // opcional: mostrar botón conectar si existe
+        const infoEl = document.getElementById("spotify-info") || document.getElementById("spotifyPlayer");
+        if (infoEl) infoEl.innerHTML = `<p>Conectar Spotify para ver lo que escuchas.</p><button id="connectSpotifyInline">Conectar Spotify</button>`;
+        // attach listener si existe el botón dinámico
+        const btn = document.getElementById("connectSpotifyInline");
+        if (btn) btn.onclick = () => loginWithSpotify();
+        return;
+    }
 
     try {
         const response = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` }
         });
 
+        const infoEl = document.getElementById("spotify-info") || document.getElementById("spotifyPlayer");
+        if (!infoEl) return;
+
         if (response.status === 204) {
-            document.getElementById("spotify-info").innerHTML =
-                "<p>No estás escuchando nada ahorita.</p>";
+            infoEl.innerHTML = "<p>No estás escuchando nada ahorita.</p>";
+            return;
+        }
+
+        if (!response.ok) {
+            // token inválido/expirado: limpiarlo
+            console.warn("Spotify no OK", response.status);
+            if (response.status === 401) {
+                localStorage.removeItem("access_token");
+            }
+            infoEl.innerHTML = `<p>Error al recuperar música (status ${response.status}).</p>`;
             return;
         }
 
         const data = await response.json();
+        if (!data || !data.item) {
+            infoEl.innerHTML = "<p>No hay información de reproducción.</p>";
+            return;
+        }
+
         const track = data.item;
+        const progress = data.progress_ms || 0;
+        const duration = track.duration_ms || 1;
+        const percentage = Math.min(100, Math.max(0, (progress / duration) * 100));
 
-        const progress = data.progress_ms;
-        const duration = track.duration_ms;
-        const percentage = (progress / duration) * 100;
-
-        document.getElementById("spotify-info").innerHTML = `
+        infoEl.innerHTML = `
             <div class="now-playing-container">
                 <img src="${track.album.images[0].url}" class="album-cover">
-
                 <div class="track-info">
                     <h3>${track.name}</h3>
                     <p>${track.artists.map(a => a.name).join(", ")}</p>
-
                     <div class="progress-container">
                         <div class="progress-bar">
-                            <div 
-                                class="progress-fill" 
-                                style="width:${percentage}%">
-                            </div>
+                            <div class="progress-fill" style="width:${percentage}%"></div>
                         </div>
-
                         <div class="progress-times">
                             <span>${formatTime(progress)}</span>
                             <span>${formatTime(duration)}</span>
@@ -388,27 +468,19 @@ async function fetchNowPlaying() {
                 </div>
             </div>
         `;
-
-    } catch (error) {
-        console.error("Error obteniendo Spotify Now Playing:", error);
+    } catch (err) {
+        console.error("Error fetchNowPlaying:", err);
     }
 }
 
-// Actualizar más frecuente para animar la barra
-setInterval(fetchNowPlaying, 1000);
-
-// Ejecutar si hay callback
-handleSpotifyCallback();
-
-// Actualizar si ya hay token
-if (localStorage.getItem("spotify_access_token")) {
-    refreshNowPlaying();
-    setInterval(refreshNowPlaying, 5000);
+// arrancar actualización periódica (si estamos en index.html)
+if (!location.pathname.endsWith("/callback.html")) {
+    // intentar inmediatamente y luego cada 1s para barra fluida
+    fetchNowPlaying();
+    setInterval(fetchNowPlaying, 1000);
 }
 
-document.getElementById("connectSpotify").onclick = () => {
-    loginWithSpotify();
-};
+/* -------------------------- INICIO --------------------------- */
 
 renderCalendar();
 updateSidebar();
