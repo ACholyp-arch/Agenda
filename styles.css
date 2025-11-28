@@ -1,27 +1,39 @@
+/* ======== GLOBAL ======== */
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     background: #f3f3f3;
     display: flex;
+    height: 100vh;
+    overflow: hidden;
 }
+
+/* ======== HEADER (en el centro arriba) ======== */
 
 header {
+    position: fixed;
+    top: 0;
+    left: 250px;
+    right: 300px;
+    background: #f3f3f3;
     padding: 20px;
-    width: 100%;
     text-align: center;
+    z-index: 10;
 }
 
-h1 {
-    margin-bottom: 5px;
+h1 { 
+    margin: 0;
 }
 
 #currentMonth {
-    margin: 0;
+    margin: 5px 0 0 0;
     font-size: 26px;
     font-weight: bold;
 }
 
-/* Barra izquierda */
+/* ======== COLUMNA IZQUIERDA: TAREAS ======== */
+
 #taskSidebar {
     width: 250px;
     background: white;
@@ -43,11 +55,12 @@ h1 {
     border-radius: 6px;
 }
 
-/* Calendario */
+/* ======== COLUMNA CENTRAL: CALENDARIO ======== */
+
 #calendarContainer {
-    width: 75%;
-    max-width: 750px;
-    margin: auto;
+    flex: 1;
+    padding: 120px 40px 40px 40px;
+    overflow-y: auto;
 }
 
 #calendar {
@@ -62,9 +75,11 @@ h1 {
     border-radius: 10px;
     border: 1px solid #ddd;
     cursor: pointer;
+    min-height: 90px;
 }
 
-/* Modal */
+/* ======== MODAL ======== */
+
 .modal {
     display: none;
     position: fixed;
@@ -73,6 +88,7 @@ h1 {
     background: #0006;
     justify-content: center;
     align-items: center;
+    z-index: 100;
 }
 
 .modal-content {
@@ -89,18 +105,8 @@ h1 {
     cursor: pointer;
 }
 
-/* Spotify */
-#spotifySection {
-    margin: 40px auto;
-    text-align: center;
-}
+/* ======== SUBTAREAS Y TAREAS ======== */
 
-#spotifyPlayer iframe {
-    margin-top: 20px;
-    width: 320px;
-    height: 380px;
-    border-radius: 12px;
-}
 .task-completed {
     opacity: 0.4;
     text-decoration: line-through;
@@ -125,7 +131,26 @@ h1 {
     font-weight: 600;
 }
 
-/* Contenedor principal */
+/* ======== COLUMNA DERECHA: SPOTIFY ======== */
+
+#spotifySection {
+    width: 300px;
+    background: white;
+    padding: 20px;
+    border-left: 1px solid #ddd;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+#spotifyPlayer iframe {
+    margin-top: 20px;
+    width: 100%;
+    height: 380px;
+    border-radius: 12px;
+}
+
+/* ======== NOW PLAYING (diseño bonito) ======== */
+
 .now-playing-container {
     display: flex;
     align-items: center;
@@ -134,16 +159,15 @@ h1 {
     padding: 14px;
     border-radius: 12px;
     color: white;
+    margin-top: 15px;
 }
 
-/* Imagen del álbum */
 .album-cover {
     width: 70px;
     height: 70px;
     border-radius: 8px;
 }
 
-/* Info */
 .track-info h3 {
     margin: 0;
     font-size: 16px;
@@ -155,7 +179,8 @@ h1 {
     opacity: 0.8;
 }
 
-/* Barra de progreso */
+/* ======== PROGRESS BAR ======== */
+
 .progress-container {
     margin-top: 8px;
 }
@@ -170,7 +195,7 @@ h1 {
 
 .progress-fill {
     height: 100%;
-    background: #1db954; /* Verde de Spotify */
+    background: #1db954; 
     transition: width 0.5s linear;
 }
 
