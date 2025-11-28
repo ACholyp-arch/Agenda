@@ -1,166 +1,61 @@
-/* ----------------- GENERAL ----------------- */
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f5f5f5;
-}
-
-.layout {
-    display: flex;
-    height: 100vh;
-}
-
-/* ----------------- SIDEBAR ----------------- */
-
-.sidebar {
-    width: 25%;
-    background: white;
-    border-right: 2px solid #ddd;
-    padding: 20px;
-    overflow-y: auto;
-}
-
-.sidebar h2 {
-    margin-top: 0;
-}
-
-#todayTasks li {
-    list-style: none;
-    padding: 8px;
-    margin-bottom: 6px;
-    border-radius: 5px;
-    background: #ececec;
-}
-
-/* ----------------- MAIN ----------------- */
-
-.main {
-    flex-grow: 1;
-    padding: 20px;
-    overflow-y: auto;
-}
-
-.title {
-    text-align: center;
-    margin-top: 0;
-    font-size: 30px;
-}
-
-/* ----------------- MES ----------------- */
-
-.month-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-}
-
-#currentMonth {
-    margin: 0;
-    font-size: 26px;
-    text-transform: capitalize;
-}
-
-.selected-date {
-    text-align: center;
-    margin-top: 5px;
-}
-
-/* ----------------- BOTONES ----------------- */
-
-.view-switch {
-    text-align: center;
-    margin: 15px 0;
-}
-
-button {
-    cursor: pointer;
-    padding: 6px 12px;
-    border: none;
-    background: #3498db;
-    color: white;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-button:hover {
-    background: #2176b8;
-}
-
-/* ----------------- CALENDARIO MENSUAL ----------------- */
-
-.calendar {
-    max-width: 700px;
-    margin: 0 auto;
+/* Layout de 3 columnas */
+.container {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    gap: 20px;
+    padding: 20px;
 }
 
-.calendar-day {
-    background: white;
-    border-radius: 6px;
-    padding: 8px;
-    min-height: 80px;
-    border: 1px solid #ddd;
+/* Estilos de cada columna */
+.column {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* Ajustes visuales */
+.left, .right {
+    background: #f7f7f7;
+}
+
+.center {
+    background: #ffffff;
+}
+
+/* Calendario */
+#calendar-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#calendar {
+    margin-top: 20px;
+}
+
+/* Spotify */
+#spotifyContainer {
+    margin-top: 20px;
+}
+
+/* Tareas */
+.task {
+    margin-bottom: 10px;
+}
+
+.task-header {
+    font-weight: bold;
     cursor: pointer;
 }
-
-.calendar-day.hasTask {
-    border-left: 5px solid #3498db;
-}
-
-.calendar-day:hover {
-    background: #f0f0f0;
-}
-
-/* ----------------- TAREAS ----------------- */
-
-#taskList li {
-    list-style: none;
-    background: white;
-    padding: 10px;
-    margin-bottom: 8px;
-    border-radius: 6px;
-    border-left: 6px solid black;
-}
-
-.subtasks {
+.task-details {
     margin-left: 20px;
-}
-
-/* ----------------- VISTA SEMANAL ----------------- */
-
-.week {
-    max-width: 700px;
-    margin: 15px auto;
-}
-
-/* ----------------- MODAL ----------------- */
-
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 350px;
-}
-
-.hidden {
     display: none;
 }
+.task-details.open {
+    display: block;
+}
 
-.subtask-item {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 6px;
+.completed {
+    opacity: 0.5;
+    text-decoration: line-through;
 }
