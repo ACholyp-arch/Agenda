@@ -4,60 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ser o no ser</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <aside id="taskSidebar">
-        <h3>Tareas del día</h3>
-        <ul id="taskListToday"></ul>
-    </aside>
+<div class="container">
 
-    <header>
-        <h1>Ser o no ser</h1>
-        <h2 id="currentMonth"></h2>
+    <!-- PANEL IZQUIERDO -->
+    <div class="sidebar">
+        <h2>Tareas de hoy</h2>
+        <ul id="todayTasks"></ul>
 
-        <div class="nav-btns">
-            <button id="prevMonth">◀</button>
-            <button id="todayBtn">Hoy</button>
-            <button id="nextMonth">▶</button>
-            <button id="weekViewBtn">Vista Semanal</button>
-            <button id="monthViewBtn" style="display:none;">Vista Mensual</button>
-        </div>
-    </header>
-
-    <div id="calendarContainer">
-        <div id="calendar"></div>
-    </div>
-
-    <!-- Modal para agregar tareas -->
-    <div id="taskModal" class="modal">
-        <div class="modal-content">
-            <h3 id="modalDateTitle"></h3>
-            <input id="taskInput" type="text" placeholder="Escribe una tarea...">
-            <button id="addTaskBtn">Agregar tarea</button>
-
-            <ul id="taskListForDay"></ul>
-
-            <button class="closeBtn" id="closeModal">Cerrar</button>
-        </div>
-    </div>
-
-    <!-- Spotify -->
-    <section id="spotifySection">
-        <h3>Mi música</h3>
-
-        <input 
-            type="text" 
-            id="spotifyInput" 
-            placeholder="Pega un enlace de Spotify"
-        >
-
-        <button id="loadSpotify">Cargar Spotify</button>
+        <h3>Agregar música</h3>
+        <input type="text" id="spotifyInput" placeholder="Pega tu link de Spotify">
+        <button onclick="loadSpotify()">Cargar</button>
 
         <div id="spotifyPlayer"></div>
-    </section>
+    </div>
 
-    <script src="script.js"></script>
+    <!-- PANEL CENTRAL -->
+    <div class="main">
+        <h1>Ser o no ser</h1>
+
+        <div class="top-bar">
+            <h2 id="currentMonth"></h2>
+            <div>
+                <button onclick="prevMonth()">◀</button>
+                <button onclick="goToday()">Hoy</button>
+                <button onclick="nextMonth()">▶</button>
+            </div>
+        </div>
+
+        <h3 id="selectedDate"></h3>
+
+        <!-- Switch vista -->
+        <div class="view-switch">
+            <button onclick="showMonthView()">Vista mensual</button>
+            <button onclick="showWeekView()">Vista semanal</button>
+        </div>
+
+        <!-- Calendario mensual -->
+        <div id="calendar"></div>
+
+        <!-- Vista semanal -->
+        <div id="weekView" class="week hidden"></div>
+
+        <h3>Tareas de este día</h3>
+        <button onclick="openTaskModal()">Agregar tarea</button>
+        <ul id="taskList"></ul>
+    </div>
+</div>
+
+<!-- MODAL PARA AGREGAR TAREA -->
+<div id="taskModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>Nueva tarea</h3>
+
+        <label>Título</label>
+        <input type="text" id="taskTitle">
+
+        <label>Color</label>
+        <input type="color" id="taskColor" value="#3498db">
+
+        <label>Subtareas</label>
+        <div id="subtaskContainer"></div>
+        <button onclick="addSubtask()">+ Subtarea</button>
+
+        <br><br>
+
+        <button onclick="saveTask()">Guardar</button>
+        <button onclick="closeTaskModal()">Cancelar</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
