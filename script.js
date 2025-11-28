@@ -1,173 +1,196 @@
-const calendarElement = document.getElementById("calendar");
-const weekViewBtn = document.getElementById("weekViewBtn");
-const monthViewBtn = document.getElementById("monthViewBtn");
-const todayBtn = document.getElementById("todayBtn");
-const nextMonthBtn = document.getElementById("nextMonth");
-const prevMonthBtn = document.getElementById("prevMonth");
-const currentMonthText = document.getElementById("currentMonth");
-
-const sidebarList = document.getElementById("taskListToday");
-
-const taskModal = document.getElementById("taskModal");
-const taskInput = document.getElementById("taskInput");
-const addTaskBtn = document.getElementById("addTaskBtn");
-const taskListForDay = document.getElementById("taskListForDay");
-const modalDateTitle = document.getElementById("modalDateTitle");
-const closeModal = document.getElementById("closeModal");
-
 let currentDate = new Date();
-let selectedDay = null;
-
-// Guardar tareas: { "2025-02-28": ["Hacer tarea", "Ir al gym"] }
+let selectedDay = new Date();
 let tasks = JSON.parse(localStorage.getItem("tasks")) || {};
 
-function saveTasks() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-}
-
-const months = [
-    "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-    "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
-];
-
-/* -------------------------- RENDER CALENDARIO -------------------------- */
+// ------------------ CALENDARIO ------------------
 
 function renderCalendar() {
-    calendarElement.innerHTML = "";
-    monthViewBtn.style.display = "none";
-    weekViewBtn.style.display = "inline-block";
-
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
-    currentMonthText.innerText = `${months[month]} ${year}`;
+    document.getElementById("currentMonth").textContent =
+        currentDate.toLocaleString("es", { month: "long", year: "numeric" });
+
+    document.getElementById("selectedDate").textContent =
+        selectedDay.toLocaleDateString("es");
 
     const firstDay = new Date(year, month, 1).getDay();
-    const lastDay = new Date(year, month + 1, 0).getDate();
+    const numDays = new Date(year, month + 1, 0).getDate();
 
-    // Días semana
-    const daysOfWeek = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
-    daysOfWeek.forEach(d => {
-        const header = document.createElement("div");
-        header.className = "day header";
-        header.innerText = d;
-        calendarElement.appendChild(header);
-    });
+    const calendar = document.getElementById("calendar");
+    calendar.innerHTML = "";
 
-    // Espacios vacíos
     for (let i = 0; i < firstDay; i++) {
-        calendarElement.appendChild(document.createElement("div"));
+        calendar.innerHTML += `<div></div>`;
     }
 
-    // Días
-    for (let day = 1; day <= lastDay; day++) {
-        const dayDiv = document.createElement("div");
-        dayDiv.className = "day";
-        dayDiv.innerText = day;
+    for (let day = 1; day <= numDays; day++) {
+        const dateKey = `${year}-${month + 1}-${day}`;
 
-        dayDiv.onclick = () => openDayModal(year, month, day);
+        const hasTask = tasks[dateKey] && tasks[dateKey].length > 0;
 
-        calendarElement.appendChild(dayDiv);
+        calendar.innerHTML += `
+            <div class="calendar-day ${hasTask ? "hasTask" : ""}"
+                onclick="selectDay(${day})">
+                <strong>${day}</strong>
+            </div>
+        `;
     }
+
+    renderTodayTasks();
+    renderTasksForDay();
 }
 
-/* -------------------------- MODAL DE TAREAS --------------------------- */
-
-function openDayModal(year, month, day) {
-    selectedDay = `${year}-${month+1}-${day}`;
-
-    modalDateTitle.innerText = `Tareas del ${day} de ${months[month]}`;
-    taskInput.value = "";
-    taskListForDay.innerHTML = "";
-
-    const list = tasks[selectedDay] || [];
-
-    list.forEach((t, index) => {
-        const li = document.createElement("li");
-        li.innerText = t;
-
-        li.onclick = () => {
-            list.splice(index, 1);
-            tasks[selectedDay] = list;
-            saveTasks();
-            openDayModal(year, month, day);
-            updateSidebar();
-        };
-
-        taskListForDay.appendChild(li);
-    });
-
-    taskModal.style.display = "flex";
-}
-
-addTaskBtn.onclick = () => {
-    if (!taskInput.value.trim()) return;
-
-    if (!tasks[selectedDay]) tasks[selectedDay] = [];
-
-    tasks[selectedDay].push(taskInput.value.trim());
-    saveTasks();
-
-    taskInput.value = "";
-    openDayModal(...selectedDay.split("-").map(Number)); 
-    updateSidebar();
-};
-
-closeModal.onclick = () => taskModal.style.display = "none";
-
-/* -------------------------- SIDEBAR --------------------------- */
-
-function updateSidebar() {
-    const today = new Date();
-    const key = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
-
-    sidebarList.innerHTML = "";
-
-    if (!tasks[key]) return;
-
-    tasks[key].forEach(t => {
-        const li = document.createElement("li");
-        li.innerText = t;
-        sidebarList.appendChild(li);
-    });
-}
-
-/* -------------------------- NAV --------------------------- */
-
-todayBtn.onclick = () => {
-    currentDate = new Date();
+function selectDay(day) {
+    selectedDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
     renderCalendar();
-};
+}
 
-nextMonthBtn.onclick = () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar();
-};
-
-prevMonthBtn.onclick = () => {
+function prevMonth() {
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendar();
-};
+}
 
-/* -------------------------- SPOTIFY --------------------------- */
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+}
 
-document.getElementById("loadSpotify").onclick = () => {
-    let url = document.getElementById("spotifyInput").value.trim();
+function goToday() {
+    currentDate = new Date();
+    selectedDay = new Date();
+    renderCalendar();
+}
 
-    if (!url.includes("spotify")) {
-        alert("Enlace inválido");
-        return;
-    }
+function showMonthView() {
+    document.getElementById("calendar").classList.remove("hidden");
+    document.getElementById("weekView").classList.add("hidden");
+}
 
-    url = url.replace("https://open.spotify.com/intl-es/", "https://open.spotify.com/");
-    const embed = url.replace("open.spotify.com/", "open.spotify.com/embed/").split("?")[0];
+function showWeekView() {
+    document.getElementById("calendar").classList.add("hidden");
+    document.getElementById("weekView").classList.remove("hidden");
+}
+
+
+// ------------------ TAREAS ------------------
+
+function openTaskModal() {
+    document.getElementById("taskModal").classList.remove("hidden");
+    document.getElementById("subtaskContainer").innerHTML = "";
+}
+
+function closeTaskModal() {
+    document.getElementById("taskModal").classList.add("hidden");
+}
+
+function addSubtask() {
+    const div = document.createElement("div");
+    div.className = "subtask-item";
+    div.innerHTML = `
+        <input type="checkbox" class="subCheck">
+        <input type="text" class="subInput" placeholder="Subtarea...">
+    `;
+    document.getElementById("subtaskContainer").appendChild(div);
+}
+
+function saveTask() {
+    const title = document.getElementById("taskTitle").value;
+    const color = document.getElementById("taskColor").value;
+
+    const dateKey = selectedDay.toISOString().split("T")[0];
+    if (!tasks[dateKey]) tasks[dateKey] = [];
+
+    const subtasks = [];
+    document.querySelectorAll(".subtask-item").forEach(st => {
+        subtasks.push({
+            done: st.querySelector(".subCheck").checked,
+            text: st.querySelector(".subInput").value
+        });
+    });
+
+    tasks[dateKey].push({
+        title,
+        color,
+        subtasks
+    });
+
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    closeTaskModal();
+    renderCalendar();
+}
+
+
+// ------------------ MOSTRAR TAREAS ------------------
+
+function renderTasksForDay() {
+    const dateKey = selectedDay.toISOString().split("T")[0];
+    const area = document.getElementById("taskList");
+    area.innerHTML = "";
+
+    if (!tasks[dateKey]) return;
+
+    tasks[dateKey].forEach((task, i) => {
+        const li = document.createElement("li");
+        li.style.borderLeftColor = task.color;
+
+        li.innerHTML = `
+            <strong>${task.title}</strong>
+            <button onclick="toggleSubtasks(${i})">▼</button>
+            <ul id="sub_${i}" class="subtasks hidden">
+                ${task.subtasks.map(st => `
+                    <li>
+                        <input type="checkbox" ${st.done ? "checked" : ""}>
+                        ${st.text}
+                    </li>`).join("")}
+            </ul>
+        `;
+
+        area.appendChild(li);
+    });
+}
+
+function toggleSubtasks(i) {
+    const el = document.getElementById("sub_" + i);
+    el.classList.toggle("hidden");
+}
+
+
+// ------------------ TAREAS DEL DÍA (sidebar) ------------------
+
+function renderTodayTasks() {
+    const todayKey = new Date().toISOString().split("T")[0];
+    const ul = document.getElementById("todayTasks");
+    ul.innerHTML = "";
+
+    if (!tasks[todayKey]) return;
+
+    tasks[todayKey].forEach(t => {
+        const li = document.createElement("li");
+        li.style.borderLeftColor = t.color;
+        li.textContent = t.title;
+        ul.appendChild(li);
+    });
+}
+
+
+// ------------------ SPOTIFY ------------------
+
+function loadSpotify() {
+    const url = document.getElementById("spotifyInput").value;
+
+    // Convertir automáticamente el link normal en embed
+    let embed = url.replace("open.spotify.com/", "open.spotify.com/embed/");
 
     document.getElementById("spotifyPlayer").innerHTML = `
-        <iframe src="${embed}" frameborder="0" allow="encrypted-media"></iframe>
+        <iframe 
+            src="${embed}"
+            width="100%" height="80" frameborder="0" allow="encrypted-media">
+        </iframe>
     `;
-};
+}
 
-/* -------------------------- INICIO --------------------------- */
+
+// ------------------ INICIO ------------------
 
 renderCalendar();
-updateSidebar();
