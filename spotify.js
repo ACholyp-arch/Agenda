@@ -1,7 +1,7 @@
 const clientId = "767b285b46a5456bb19d3e9e04052285";
-const redirectUri = "https://acholyp-arch.github.io/Agenda/callback.html";
+const redirectUri = "https://acholyp-arch.github.io/Agenda/";
 
-// LOGIN
+// LOGIN (Implicit Grant)
 function loginSpotify() {
     const scopes = [
         "user-read-playback-state",
@@ -18,15 +18,27 @@ function loginSpotify() {
     window.location.href = authUrl;
 }
 
-// OBTENER TOKEN
+// SI VOLVEMOS DEL LOGIN → GUARDAR TOKEN
+if (window.location.hash.includes("access_token")) {
+    const params = new URLSearchParams(window.location.hash.substring(1));
+    const token = params.get("access_token");
+    localStorage.setItem("spotify_token", token);
+
+    // limpiar el hash (#)
+    window.location.hash = "";
+
+    console.log("Token guardado:", token);
+}
+
+// LEER TOKEN LOCAL
 let token = localStorage.getItem("spotify_token");
 
-// SI YA HAY TOKEN → Cargar Now Playing
 if (token) {
     getCurrentSong();
     setInterval(getCurrentSong, 5000);
 }
 
+// FUNCIÓN PRINCIPAL
 function getCurrentSong() {
     fetch("https://api.spotify.com/v1/me/player/currently-playing", {
         headers: { Authorization: "Bearer " + token }
@@ -73,6 +85,7 @@ function getCurrentSong() {
     });
 }
 
+// FORMATEO DE TIEMPO
 function msToTime(ms) {
     const m = Math.floor(ms / 60000);
     const s = Math.floor((ms % 60000) / 1000);
