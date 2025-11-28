@@ -1,2 +1,53 @@
 <script src="spotify-auth.js"></script>
 <script src="spotify-now-playing.js"></script>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Conectando Spotify...</title>
+</head>
+<body>
+    <script>
+        const clientId = "767b285b46a5456bb19d3e9e04052285";
+        const redirectUri = "https://acholyp-arch.github.io/Agenda/call-back/";
+
+        async function getToken(code) {
+            const codeVerifier = localStorage.getItem("code_verifier");
+
+            const data = new URLSearchParams();
+            data.append("client_id", clientId);
+            data.append("grant_type", "authorization_code");
+            data.append("code", code);
+            data.append("redirect_uri", redirectUri);
+            data.append("code_verifier", codeVerifier);
+
+            const response = await fetch("https://accounts.spotify.com/api/token", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: data,
+            });
+
+            return await response.json();
+        }
+
+        async function main() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get("code");
+
+            if (!code) {
+                document.body.innerHTML = "Error: no code recibido.";
+                return;
+            }
+
+            const tokenData = await getToken(code);
+
+            localStorage.setItem("access_token", tokenData.access_token);
+
+            window.location.href = "https://acholyp-arch.github.io/Agenda/";
+        }
+
+        main();
+    </script>
+</body>
+</html>
