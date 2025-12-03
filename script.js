@@ -38,6 +38,12 @@ let tasks = JSON.parse(localStorage.getItem('tasks_v3')) || {}; // { "2025-12-03
 let currentFilter = 'all'; // 'all' | 'pending' | 'completed'
 let editing = { dayKey: null, taskIndex: null };
 
+// Chart instances
+let dailyChartInstance = null;
+let monthlyDoughnutInstance = null;
+let monthlyLineInstance = null;
+let monthlyBarInstance = null;
+
 // helper: format date to yyyy-mm-dd
 function formatDateYMD(date) {
   const y = date.getFullYear();
@@ -48,7 +54,7 @@ function formatDateYMD(date) {
 function parseYMD(y,m,d){ return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
 
 // save/load
-function saveTasks(){ localStorage.setItem('tasks_v3', JSON.stringify(tasks)); renderCalendarIndicators(); renderSidebar(); }
+function saveTasks(){ localStorage.setItem('tasks_v3', JSON.stringify(tasks)); renderCalendarIndicators(); renderSidebar(); updateCharts(); }
 function loadTasks(){ tasks = JSON.parse(localStorage.getItem('tasks_v3')) || {}; }
 
 // =====================
@@ -410,7 +416,7 @@ document.getElementById('currentMonth').addEventListener('click', ()=> {
 
 // =====================
 // Spotify embed loader (simple embed)
- // =====================
+// =====================
 document.getElementById('loadSpotify').addEventListener('click', ()=> {
   let url = document.getElementById('spotifyInput').value.trim();
   if(!url.includes('spotify')) { alert('Enlace inválido'); return; }
@@ -421,12 +427,108 @@ document.getElementById('loadSpotify').addEventListener('click', ()=> {
 });
 
 // =====================
-// Init
+// GRÁFICAS (Chart.js) - creación y actualización
+// =====================
+
+function updateCharts(){
+  // Destroy previous instances if exist
+  if(dailyChartInstance) { dailyChartInstance.destroy(); dailyChartInstance = null; }
+  if(monthlyDoughnutInstance) { monthlyDoughnutInstance.destroy(); monthlyDoughnutInstance = null; }
+  if(monthlyLineInstance) { monthlyLineInstance.destroy(); monthlyLineInstance = null; }
+  if(monthlyBarInstance) { monthlyBarInstance.destroy(); monthlyBarInstance = null; }
+
+  // 1) DAILY BAR: total vs completadas del día seleccionado (si modal abierto usa selectedDayKey, sino usa hoy)
+  const activeDayKey = selectedDayKey || formatDateYMD(new Date());
+  const dayList = tasks[activeDayKey] || [];
+  const dayTotal = dayList.length;
+  const dayCompleted = dayList.filter(t=>t.completed).length;
+  const dayPending = dayTotal - dayCompleted;
+
+  const dailyCtx = document.getElementById('dailyProgressChart').getContext('2d');
+  dailyChartInstance = new Chart(dailyCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Completadas', 'Pendientes'],
+      datasets: [{
+        label: 'Tareas',
+        data: [dayCompleted, dayPending],
+        backgroundColor: ['#4CAF50', '#F44336']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero:true, precision:0, ticks: { stepSize: 1 } } },
+      plugins: { legend: { display:false }, title: { display:true, text: `Progreso del día (${activeDayKey})` } }
+    }
+  });
+
+  // 2) MONTHLY DOUGHNUT: total completadas vs pendientes en el mes actual
+  const { monthLabels, monthCompletedCount, monthPendingCount } = aggregateMonthCounts(currentDate);
+  const totalCompletedMonth = monthCompletedCount.reduce((a,b)=>a+b,0);
+  const totalPendingMonth = monthPendingCount.reduce((a,b)=>a+b,0);
+
+  const doughCtx = document.getElementById('monthlyDoughnutChart').getContext('2d');
+  monthlyDoughnutInstance = new Chart(doughCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Completadas', 'Pendientes'],
+      datasets: [{ data: [totalCompletedMonth, totalPendingMonth], backgroundColor: ['#4CAF50', '#F44336'] }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ title:{ display:true, text: 'Resumen mensual' } } }
+  });
+
+  // 3) MONTHLY LINE: % completado por día del mes (tendencia)
+  const lineCtx = document.getElementById('monthlyLineChart').getContext('2d');
+  const percentPerDay = monthLabels.map((label, i)=>{
+    const total = monthCompletedCount[i] + monthPendingCount[i];
+    return total ? Math.round((monthCompletedCount[i]/total)*100) : 0;
+  });
+  monthlyLineInstance = new Chart(lineCtx, {
+    type: 'line',
+    data: { labels: monthLabels, datasets: [{ label: '% completado', data: percentPerDay, borderColor: '#6699ff', tension:0.25, fill:false }] },
+    options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ min:0, max:100 } }, plugins:{ title:{ display:true, text: 'Tendencia mensual (% completado)' } } }
+  });
+
+  // 4) MONTHLY BAR: tareas totales por día (resumen tipo 3/4)
+  const barCtx = document.getElementById('monthlyBarChart').getContext('2d');
+  const totalsPerDay = monthLabels.map((_,i) => monthCompletedCount[i] + monthPendingCount[i]);
+  monthlyBarInstance = new Chart(barCtx, {
+    type: 'bar',
+    data: { labels: monthLabels, datasets: [{ label:'Tareas totales', data: totalsPerDay, backgroundColor: '#6699ff' }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ title:{ display:true, text:'Tareas por día (mes actual)' } }, scales:{ y:{ beginAtZero:true, precision:0 } } }
+  });
+}
+
+// Helper: aggregate counts for the current month
+function aggregateMonthCounts(dateRef){
+  const year = dateRef.getFullYear();
+  const month = dateRef.getMonth() + 1; // 1..12
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const labels = [];
+  const completedCounts = [];
+  const pendingCounts = [];
+
+  for(let d=1; d<=daysInMonth; d++){
+    const key = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    labels.push(String(d));
+    const list = tasks[key] || [];
+    const c = list.filter(t=>t.completed).length;
+    const p = list.length - c;
+    completedCounts.push(c);
+    pendingCounts.push(p);
+  }
+  return { monthLabels: labels, monthCompletedCount: completedCounts, monthPendingCount: pendingCounts };
+}
+
+// =====================
+// Init: load and render
 // =====================
 loadTasks();
 renderCalendar();
 renderSidebar();
-setFilter('all'); // default
+setFilter('all');
+updateCharts();
 
-// Expose some functions for dev console if needed
+// Expose small helpers for debug
 window.openDayModal = openDayModal;
