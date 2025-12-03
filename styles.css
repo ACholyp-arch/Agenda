@@ -1,63 +1,60 @@
+/* ================== LAYOUT GENERAL ================== */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     background: #f3f3f3;
-    /* Grid para el layout principal (3 columnas) */
-    display: grid;
-    /* Tareas (250px) | Contenido Central (flexible) | Spotify (350px) */
-    grid-template-columns: 250px 1fr 350px;
+    display: grid; /* Grid principal 3 columnas */
+    grid-template-columns: 250px 1fr 350px; /* Sidebar | Centro | Spotify */
     min-height: 100vh;
-    box-sizing: border-box; /* Asegura que el padding no desborde */
+    box-sizing: border-box;
 }
 
-/* 1. Barras Laterales (Asegurar que ocupen 100% de altura) */
-
+/* ================== SIDEBAR DE TAREAS ================== */
 #taskSidebar {
     background: white;
     padding: 20px;
     border-right: 1px solid #ddd;
     overflow-y: auto;
-    /* Altura completa para ocupar toda la celda del grid */
-    height: 100%; 
+    min-height: 100vh; /* ← Corrección */
     box-sizing: border-box;
 }
 
+/* ================== SECCIÓN SPOTIFY ================== */
 #spotifySection {
     grid-column: 3 / 4;
     background: white;
     padding: 20px;
     border-left: 1px solid #ddd;
     overflow-y: auto;
-    /* Altura completa para ocupar toda la celda del grid */
-    height: 100%; 
+    min-height: 100vh; /* ← Corrección */
     box-sizing: border-box;
 }
 
-/* 2. Contenido Central (MAIN) */
-
+/* ================== CONTENIDO CENTRAL ================== */
 main {
     grid-column: 2 / 3;
     display: flex;
     flex-direction: column;
-    /* Necesario para que flex-grow funcione correctamente */
     width: 100%;
+    height: 100vh;     /* Permite que crezca verticalmente */
+    overflow-y: auto;  /* Hace scroll si el contenido es largo */
 }
 
-/* HEADER (Título y Navegación) */
+/* ===================== HEADER ===================== */
 header {
     padding: 20px;
-    width: 100%; /* Asegura que ocupe todo el ancho de MAIN */
+    width: 100%;
     text-align: center;
     box-sizing: border-box;
 }
 
-/* DASHBOARD DE PROGRESO */
+/* ================== DASHBOARD DE PROGRESO ================== */
 #progressDashboard {
     padding: 20px;
     background: #fff;
     border-bottom: 1px solid #ddd;
     text-align: center;
-    width: 100%; /* Asegura que ocupe todo el ancho de MAIN */
+    width: 100%;
     box-sizing: border-box;
 }
 
@@ -66,8 +63,7 @@ header {
     justify-content: space-around;
     align-items: flex-start;
     gap: 20px;
-    /* Hace que los gráficos se centren mejor */
-    margin: 0 auto; 
+    margin: 0 auto;
     max-width: 650px;
 }
 
@@ -76,45 +72,17 @@ header {
     max-height: 300px;
 }
 
-/* CALENDARIO */
+/* ================== CALENDARIO ================== */
 #calendarContainer {
     padding: 20px;
     margin: 0 auto;
     max-width: 750px;
-    /* Clave: Ocupa el espacio vertical restante */
-    flex-grow: 1; 
-    width: 100%; /* Necesario para que ocupe el ancho de MAIN */
+    flex-grow: 1; /* Ocupa el espacio sobrante */
+    width: 100%;
     box-sizing: border-box;
 }
 
-/* Resto del CSS (sin cambios mayores, solo se reordenó para claridad) */
-
-h1 {
-    margin-bottom: 5px;
-}
-
-#currentMonth {
-    margin: 0;
-    font-size: 26px;
-    font-weight: bold;
-}
-
-/* Estilo para las tareas de hoy en la sidebar */
-#taskSidebar ul {
-    padding: 0;
-    list-style: none;
-}
-
-#taskSidebar li {
-    padding: 8px;
-    margin-bottom: 5px;
-    border-radius: 6px;
-    border-left: 5px solid;
-    background: #f9f9f9;
-    font-weight: bold;
-}
-
-/* Calendario GRID */
+/* GRID del calendario */
 #calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -131,7 +99,7 @@ h1 {
     min-height: 50px;
 }
 
-/* Puntos de color para tareas en el calendario */
+/* Marcadores de tareas en días */
 .task-indicator {
     width: 8px;
     height: 8px;
@@ -141,13 +109,12 @@ h1 {
     right: 5px;
 }
 
-/* Modal */
+/* ================== MODAL ================== */
 .modal-content {
-    /* ... estilos existentes ... */
     width: 400px;
 }
 
-/* Nuevo en Modal: Subtareas y Color */
+/* Subtareas y color */
 .color-picker-container {
     margin: 15px 0;
     display: flex;
@@ -165,7 +132,7 @@ h1 {
     flex-grow: 1;
 }
 
-/* LISTA DE TAREAS EN EL MODAL */
+/* Lista de tareas en modal */
 #taskListForDay li {
     background: #eee;
     padding: 10px;
@@ -205,4 +172,22 @@ h1 {
 .completed {
     text-decoration: line-through;
     opacity: 0.6;
+}
+
+/* ========= Estética general ========== */
+h1 { margin-bottom: 5px; }
+#currentMonth {
+    margin: 0;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+#taskSidebar ul { padding: 0; list-style: none; }
+#taskSidebar li {
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+    border-left: 5px solid;
+    background: #f9f9f9;
+    font-weight: bold;
 }
