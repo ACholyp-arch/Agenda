@@ -1,81 +1,92 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ser o no ser</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ser o no ser</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <aside id="taskSidebar">
-        <h3>Tareas de Hoy</h3>
-        <ul id="taskListToday"></ul>
-    </aside>
+  <aside id="taskSidebar">
+    <h3>Tareas de Hoy</h3>
 
-    <main>
-        <header>
-            <h1>Ser o no ser</h1>
-            <h2 id="currentMonth"></h2>
-
-            <div class="nav-btns">
-                <button id="prevMonth">◀</button>
-                <button id="todayBtn">Hoy</button>
-                <button id="nextMonth">▶</button>
-                <button id="weekViewBtn">Vista Semanal</button>
-                <button id="monthViewBtn" style="display:none;">Vista Mensual</button>
-            </div>
-        </header>
-
-        <section id="progressDashboard">
-            <h3>📊 Mi Progreso</h3>
-            <div class="charts-container">
-                <canvas id="dailyProgressChart"></canvas>
-                <canvas id="monthlyProgressChart"></canvas>
-            </div>
-        </section>
-
-        <div id="calendarContainer">
-            <div id="calendar"></div>
-        </div>
-    </main>
-
-    <section id="spotifySection">
-        <h3>Mi música</h3>
-        <input 
-            type="text" 
-            id="spotifyInput" 
-            placeholder="Pega un enlace de Spotify"
-        >
-        <button id="loadSpotify">Cargar Spotify</button>
-        <div id="spotifyPlayer"></div>
-    </section>
-
-    <div id="taskModal" class="modal">
-        <div class="modal-content">
-            <h3 id="modalDateTitle"></h3>
-
-            <div class="color-picker-container">
-                <strong>Color de Tarea:</strong>
-                <input type="color" id="taskColorInput" value="#6699ff">
-            </div>
-            
-            <input id="taskInput" type="text" placeholder="Escribe una tarea principal...">
-            
-            <div class="subtask-container">
-                <input id="subTaskInput" type="text" placeholder="Añadir subtarea..." disabled>
-                <button id="addSubTaskBtn" disabled>+</button>
-            </div>
-            
-            <button id="addTaskBtn">Agregar tarea</button>
-
-            <ul id="taskListForDay"></ul>
-
-            <button class="closeBtn" id="closeModal">Cerrar</button>
-        </div>
+    <div class="filter-row">
+      <button id="filterAll" class="filter-btn active">Todas</button>
+      <button id="filterPending" class="filter-btn">Pendientes</button>
+      <button id="filterCompleted" class="filter-btn">Completadas</button>
     </div>
-    
-    <script src="script.js"></script>
+
+    <ul id="taskListToday"></ul>
+  </aside>
+
+  <main>
+    <header>
+      <h1>Ser o no ser</h1>
+      <div class="month-row">
+        <button id="prevMonth">◀</button>
+        <div id="currentMonth"></div>
+        <button id="nextMonth">▶</button>
+        <button id="todayBtn" class="small">Hoy</button>
+      </div>
+    </header>
+
+    <section id="calendarContainer">
+      <div id="calendar"></div>
+    </section>
+  </main>
+
+  <section id="spotifySection">
+    <h3>Mi música</h3>
+    <input id="spotifyInput" type="text" placeholder="Pega un enlace de Spotify">
+    <button id="loadSpotify">Cargar Spotify</button>
+    <div id="spotifyPlayer"></div>
+  </section>
+
+  <!-- MODAL DÍA (Añadir / ver / editar tareas del día) -->
+  <div id="taskModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <h3 id="modalDateTitle">Tareas</h3>
+
+      <label>Color de tarea: <input type="color" id="taskColorInput" value="#6699ff"></label>
+
+      <div class="input-row">
+        <input id="taskInput" type="text" placeholder="Escribe una tarea principal...">
+        <button id="addTaskBtn" class="primary">Agregar</button>
+      </div>
+
+      <div class="input-row subtask-inline">
+        <input id="subTaskInput" type="text" placeholder="Añadir subtarea (selecciona tarea primero)">
+        <button id="addSubTaskBtn" disabled>➕ Sub</button>
+      </div>
+
+      <ul id="taskListForDay"></ul>
+
+      <div class="modal-actions">
+        <button id="closeModal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT TASK MODAL -->
+  <div id="editModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <h3>Editar tarea</h3>
+      <input id="editText" type="text" placeholder="Texto de la tarea">
+      <div class="input-row">
+        <label>Color: <input id="editColor" type="color"></label>
+        <label>Fecha: <input id="editDate" type="date"></label>
+      </div>
+      <div class="input-row">
+        <label><input id="editCompleted" type="checkbox"> Completada</label>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelEdit">Cancelar</button>
+        <button id="saveEdit" class="primary">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
