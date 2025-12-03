@@ -1,81 +1,81 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ser o no ser</title>
-    <link rel="stylesheet" href="styles.css">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ser o no ser</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <aside id="taskSidebar">
-        <h3>Tareas de Hoy</h3>
-        <ul id="taskListToday"></ul>
-    </aside>
+    <aside id="taskSidebar">
+        <h3>Tareas de Hoy</h3>
+        <ul id="taskListToday"></ul>
+    </aside>
 
-    <main>
-        <header>
-            <h1>Ser o no ser</h1>
-            <h2 id="currentMonth"></h2>
+    <main>
+        <header>
+            <h1>Ser o no ser</h1>
+            <h2 id="currentMonth"></h2>
 
-            <div class="nav-btns">
-                <button id="prevMonth">◀</button>
-                <button id="todayBtn">Hoy</button>
-                <button id="nextMonth">▶</button>
-                <button id="weekViewBtn">Vista Semanal</button>
-                <button id="monthViewBtn" style="display:none;">Vista Mensual</button>
-            </div>
-        </header>
+            <div class="nav-btns">
+                <button id="prevMonth">◀</button>
+                <button id="todayBtn">Hoy</button>
+                <button id="nextMonth">▶</button>
+                <button id="weekViewBtn">Vista Semanal</button>
+                <button id="monthViewBtn" style="display:none;">Vista Mensual</button>
+            </div>
+        </header>
 
-        <section id="progressDashboard">
-            <h3>📊 Mi Progreso</h3>
-            <div class="charts-container">
-                <canvas id="dailyProgressChart"></canvas>
-                <canvas id="monthlyProgressChart"></canvas>
-            </div>
-        </section>
+        <section id="progressDashboard">
+            <h3>📊 Mi Progreso</h3>
+            <div class="charts-container">
+                <canvas id="dailyProgressChart"></canvas>
+                <canvas id="monthlyProgressChart"></canvas>
+            </div>
+        </section>
 
-        <div id="calendarContainer">
-            <div id="calendar"></div>
-        </div>
-    </main>
+        <div id="calendarContainer">
+            <div id="calendar"></div>
+        </div>
+    </main>
 
-        <div id="taskModal" class="modal">
-        <div class="modal-content">
-            <h3 id="modalDateTitle"></h3>
+    <section id="spotifySection">
+        <h3>Mi música</h3>
+        <input 
+            type="text" 
+            id="spotifyInput" 
+            placeholder="Pega un enlace de Spotify"
+        >
+        <button id="loadSpotify">Cargar Spotify</button>
+        <div id="spotifyPlayer"></div>
+    </section>
 
-                        <div class="color-picker-container">
-                <strong>Color de Tarea:</strong>
-                <input type="color" id="taskColorInput" value="#6699ff">
-            </div>
-            
-            <input id="taskInput" type="text" placeholder="Escribe una tarea principal...">
-            
-                        <div class="subtask-container">
-                <input id="subTaskInput" type="text" placeholder="Añadir subtarea..." disabled>
-                <button id="addSubTaskBtn" disabled>+</button>
-            </div>
-            
-            <button id="addTaskBtn">Agregar tarea</button>
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalDateTitle"></h3>
 
-            <ul id="taskListForDay"></ul>
+            <div class="color-picker-container">
+                <strong>Color de Tarea:</strong>
+                <input type="color" id="taskColorInput" value="#6699ff">
+            </div>
+            
+            <input id="taskInput" type="text" placeholder="Escribe una tarea principal...">
+            
+            <div class="subtask-container">
+                <input id="subTaskInput" type="text" placeholder="Añadir subtarea..." disabled>
+                <button id="addSubTaskBtn" disabled>+</button>
+            </div>
+            
+            <button id="addTaskBtn">Agregar tarea</button>
 
-            <button class="closeBtn" id="closeModal">Cerrar</button>
-        </div>
-    </div>
+            <ul id="taskListForDay"></ul>
 
-        <section id="spotifySection">
-        <h3>Mi música</h3>
-        <input 
-            type="text" 
-            id="spotifyInput" 
-            placeholder="Pega un enlace de Spotify"
-        >
-        <button id="loadSpotify">Cargar Spotify</button>
-        <div id="spotifyPlayer"></div>
-    </section>
-
-    <script src="script.js"></script>
+            <button class="closeBtn" id="closeModal">Cerrar</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
 </body>
 </html>
