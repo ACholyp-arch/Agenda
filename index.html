@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Ser o no ser</title>
   <link rel="stylesheet" href="styles.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -30,6 +32,31 @@
         <button id="todayBtn" class="small">Hoy</button>
       </div>
     </header>
+
+    <!-- DASHBOARD: aquí van las gráficas -->
+    <section id="progressDashboard">
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h4>Progreso del día</h4>
+          <canvas id="dailyProgressChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Resumen mensual (rosquilla)</h4>
+          <canvas id="monthlyDoughnutChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Tendencia mensual (línea)</h4>
+          <canvas id="monthlyLineChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Resumen por día (barra)</h4>
+          <canvas id="monthlyBarChart"></canvas>
+        </div>
+      </div>
+    </section>
 
     <section id="calendarContainer">
       <div id="calendar"></div>
