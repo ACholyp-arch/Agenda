@@ -1,103 +1,187 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background: #f3f3f3;
-    display: flex;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f3f3f3;
+    /* Usamos Grid para el layout principal */
+    display: grid;
+    grid-template-columns: 250px 1fr 350px; /* Tareas | Contenido Central | Spotify/Gráficas */
+    min-height: 100vh;
+}
+
+main {
+    /* Main ocupará el espacio central */
+    grid-column: 2 / 3;
+    display: flex;
+    flex-direction: column;
 }
 
 header {
-    padding: 20px;
-    width: 100%;
-    text-align: center;
+    padding: 20px;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
 }
 
 h1 {
-    margin-bottom: 5px;
+    margin-bottom: 5px;
 }
 
 #currentMonth {
-    margin: 0;
-    font-size: 26px;
-    font-weight: bold;
+    margin: 0;
+    font-size: 26px;
+    font-weight: bold;
 }
 
-/* Barra izquierda */
+/* Barra izquierda (Tareas) */
 #taskSidebar {
-    width: 250px;
-    background: white;
-    padding: 20px;
-    border-right: 1px solid #ddd;
-    height: 100vh;
-    overflow-y: auto;
+    /* grid-column: 1 / 2; (Ya está por defecto en el grid) */
+    background: white;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
 }
 
 #taskSidebar ul {
-    padding: 0;
-    list-style: none;
+    padding: 0;
+    list-style: none;
 }
 
+/* Estilo para las tareas de hoy en la sidebar */
 #taskSidebar li {
-    background: #eee;
-    padding: 8px;
-    margin-bottom: 5px;
-    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+    border-left: 5px solid; /* Usaremos este borde para el color de la tarea */
+    background: #f9f9f9;
+    font-weight: bold;
+}
+
+/* DASHBOARD DE PROGRESO (Nuevo Panel Central Superior) */
+#progressDashboard {
+    padding: 20px;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.charts-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+#dailyProgressChart, #monthlyProgressChart {
+    max-width: 300px;
+    max-height: 300px;
 }
 
 /* Calendario */
 #calendarContainer {
-    width: 75%;
-    max-width: 750px;
-    margin: auto;
+    padding: 20px;
+    margin: 0 auto;
+    max-width: 750px;
+    flex-grow: 1; /* Para que ocupe el espacio restante en el main */
 }
 
 #calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
 }
 
 .day {
-    padding: 15px;
-    background: #fafafa;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    cursor: pointer;
+    padding: 15px;
+    background: #fafafa;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    position: relative;
+    min-height: 50px;
+}
+
+/* Puntos de color para tareas en el calendario */
+.task-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
 }
 
 /* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: #0006;
-    justify-content: center;
-    align-items: center;
-}
-
 .modal-content {
-    background: white;
-    padding: 20px;
-    width: 350px;
-    border-radius: 12px;
-    text-align: center;
+    /* ... estilos existentes ... */
+    width: 400px; /* Ligeramente más grande */
 }
 
-.closeBtn {
-    margin-top: 15px;
-    padding: 8px 15px;
-    cursor: pointer;
+/* Nuevo en Modal: Subtareas y Color */
+.color-picker-container {
+    margin: 15px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-/* Spotify */
+.subtask-container {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.subtask-container input {
+    flex-grow: 1;
+}
+
+/* LISTA DE TAREAS EN EL MODAL */
+#taskListForDay li {
+    background: #eee;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: flex-start;
+    border-left: 5px solid transparent;
+}
+
+#taskListForDay .task-checkbox {
+    margin-right: 10px;
+    transform: scale(1.3);
+}
+
+.task-text {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.subtask-list {
+    list-style: none;
+    padding-left: 25px;
+    margin-top: 5px;
+}
+
+.subtask-list li {
+    background: none;
+    padding: 3px 0;
+    margin: 0;
+    border: none;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+}
+
+.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+
+/* Spotify (Barra derecha) */
 #spotifySection {
-    margin: 40px auto;
-    text-align: center;
-}
-
-#spotifyPlayer iframe {
-    margin-top: 20px;
-    width: 320px;
-    height: 380px;
-    border-radius: 12px;
+    grid-column: 3 / 4;
+    background: white;
+    padding: 20px;
+    border-left: 1px solid #ddd;
+    overflow-y: auto;
 }
