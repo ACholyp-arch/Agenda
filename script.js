@@ -1,534 +1,326 @@
 // =====================
 // Variables globales y utilidades
 // =====================
-const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const months=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-const calendarElement = document.getElementById('calendar');
-const currentMonthText = document.getElementById('currentMonth');
-const taskModal = document.getElementById('taskModal');
-const modalDateTitle = document.getElementById('modalDateTitle');
-const taskInput = document.getElementById('taskInput');
-const addTaskBtn = document.getElementById('addTaskBtn');
-const subTaskInput = document.getElementById('subTaskInput');
-const addSubTaskBtn = document.getElementById('addSubTaskBtn');
-const taskListForDay = document.getElementById('taskListForDay');
-const closeModal = document.getElementById('closeModal');
-const taskColorInput = document.getElementById('taskColorInput');
-const sidebarList = document.getElementById('taskListToday');
+const calendarElement=document.getElementById("calendar");
+const currentMonthText=document.getElementById("currentMonth");
+const taskModal=document.getElementById("taskModal");
+const modalDateTitle=document.getElementById("modalDateTitle");
+const taskInput=document.getElementById("taskInput");
+const addTaskBtn=document.getElementById("addTaskBtn");
+const subTaskInput=document.getElementById("subTaskInput");
+const addSubTaskBtn=document.getElementById("addSubTaskBtn");
+const taskListForDay=document.getElementById("taskListForDay");
+const closeModal=document.getElementById("closeModal");
+const taskColorInput=document.getElementById("taskColorInput");
+const sidebarList=document.getElementById("taskListToday");
 
-const prevMonthBtn = document.getElementById('prevMonth');
-const nextMonthBtn = document.getElementById('nextMonth');
-const todayBtn = document.getElementById('todayBtn');
+const prevMonthBtn=document.getElementById("prevMonth");
+const nextMonthBtn=document.getElementById("nextMonth");
+const todayBtn=document.getElementById("todayBtn");
 
-const filterAllBtn = document.getElementById('filterAll');
-const filterPendingBtn = document.getElementById('filterPending');
-const filterCompletedBtn = document.getElementById('filterCompleted');
+const filterAllBtn=document.getElementById("filterAll");
+const filterPendingBtn=document.getElementById("filterPending");
+const filterCompletedBtn=document.getElementById("filterCompleted");
 
-const editModal = document.getElementById('editModal');
-const editText = document.getElementById('editText');
-const editColor = document.getElementById('editColor');
-const editDate = document.getElementById('editDate');
-const editCompleted = document.getElementById('editCompleted');
-const cancelEdit = document.getElementById('cancelEdit');
-const saveEdit = document.getElementById('saveEdit');
+const editModal=document.getElementById("editModal");
+const editText=document.getElementById("editText");
+const editColor=document.getElementById("editColor");
+const editDate=document.getElementById("editDate");
+const editCompleted=document.getElementById("editCompleted");
+const cancelEdit=document.getElementById("cancelEdit");
+const saveEdit=document.getElementById("saveEdit");
 
-let currentDate = new Date();
-let selectedDayKey = null; // yyyy-mm-dd
-let tasks = JSON.parse(localStorage.getItem('tasks_v3')) || {}; // { "2025-12-03": [ {...}, ... ] }
-let currentFilter = 'all'; // 'all' | 'pending' | 'completed'
-let editing = { dayKey: null, taskIndex: null };
+let currentDate=new Date();
+let selectedDayKey=null;
+let tasks=JSON.parse(localStorage.getItem("tasks_v3"))||{};
+let currentFilter="all";
+let editing={dayKey:null,taskIndex:null};
 
 // Chart instances
-let dailyChartInstance = null;
-let monthlyDoughnutInstance = null;
-let monthlyLineInstance = null;
-let monthlyBarInstance = null;
+let dailyChartInstance=null;
+let monthlyDoughnutInstance=null;
+let monthlyLineInstance=null;
+let monthlyBarInstance=null;
 
-// helper: format date to yyyy-mm-dd
-function formatDateYMD(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth()+1).padStart(2,'0');
-  const d = String(date.getDate()).padStart(2,'0');
-  return `${y}-${m}-${d}`;
+function formatDateYMD(date){
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
 }
-function parseYMD(y,m,d){ return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+function parseYMD(y,m,d){ return `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;}
 
-// save/load
-function saveTasks(){ localStorage.setItem('tasks_v3', JSON.stringify(tasks)); renderCalendarIndicators(); renderSidebar(); updateCharts(); }
-function loadTasks(){ tasks = JSON.parse(localStorage.getItem('tasks_v3')) || {}; }
+function saveTasks(){ localStorage.setItem("tasks_v3",JSON.stringify(tasks)); renderCalendarIndicators(); renderSidebar(); updateCharts(); }
 
 // =====================
-// RENDER CALENDAR
+// RENDER CALENDARIO
 // =====================
 function renderCalendar(){
-  calendarElement.innerHTML = "";
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-  currentMonthText.innerText = `${months[month]} ${year}`;
+  calendarElement.innerHTML="";
+  const y=currentDate.getFullYear(),m=currentDate.getMonth();
+  currentMonthText.innerText=`${months[m]} ${y}`;
 
-  // first day (0=domingo)
-  const firstDayWeekDay = new Date(year, month, 1).getDay();
-  const lastDay = new Date(year, month+1, 0).getDate();
+  const firstDay=new Date(y,m,1).getDay();
+  const lastDay=new Date(y,m+1,0).getDate();
 
-  // header row (days names)
-  const weekNames = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
-  weekNames.forEach(n => {
-    const head = document.createElement('div');
-    head.className = 'day header';
-    head.innerText = n;
-    calendarElement.appendChild(head);
+  ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"].forEach(n=>{
+    let h=document.createElement("div");
+    h.className="day header"; h.innerText=n;
+    calendarElement.appendChild(h);
   });
 
-  // Empty slots
-  for(let i=0;i<firstDayWeekDay;i++){
-    const empty = document.createElement('div');
-    empty.className = 'day empty';
-    calendarElement.appendChild(empty);
+  for(let i=0;i<firstDay;i++){
+    let e=document.createElement("div");
+    e.className="day empty"; calendarElement.appendChild(e);
   }
 
-  // Days
-  for(let d=1; d<=lastDay; d++){
-    const dayDiv = document.createElement('div');
-    dayDiv.className = 'day';
-    dayDiv.innerHTML = `<span class="num">${d}</span>`;
-
-    const dateKey = parseYMD(year, month+1, d);
-    dayDiv.dataset.date = dateKey;
-
-    // Click: abrir modal del día
-    dayDiv.addEventListener('click', ()=> openDayModal(dateKey));
-
-    calendarElement.appendChild(dayDiv);
+  for(let d=1;d<=lastDay;d++){
+    const dateKey=parseYMD(y,m+1,d);
+    let cell=document.createElement("div");
+    cell.className="day";
+    cell.dataset.date=dateKey;
+    cell.innerHTML=`<span class="num">${d}</span>`;
+    cell.onclick=()=>openDayModal(dateKey);
+    calendarElement.appendChild(cell);
   }
 
   renderCalendarIndicators();
 }
 
-// render dots and minor highlights
 function renderCalendarIndicators(){
-  document.querySelectorAll('#calendar .day').forEach(dayEl => {
-    const dateKey = dayEl.dataset.date;
-    // remove existing indicators
-    dayEl.querySelectorAll('.task-indicator').forEach(n=>n.remove());
-    // reset background
-    dayEl.style.backgroundColor = '';
-    if(!dateKey) return;
-    const list = tasks[dateKey] || [];
-    if(list.length === 0) return;
-    // show dot with first task's color
-    const dot = document.createElement('div');
-    dot.className = 'task-indicator';
-    dot.style.backgroundColor = list[0].color || '#999';
-    dayEl.appendChild(dot);
-    // if all completed, soft green background
-    if(list.every(t => t.completed)) dayEl.style.backgroundColor = '#e8ffea';
+  document.querySelectorAll("#calendar .day").forEach(cell=>{
+    const key=cell.dataset.date;
+    cell.querySelectorAll(".task-indicator").forEach(x=>x.remove());
+    cell.style.background="";
+    if(!key||!tasks[key]) return;
+
+    let list=tasks[key];
+    if(list.length>0){
+      const dot=document.createElement("div");
+      dot.className="task-indicator";
+      dot.style.background=list[0].color||"#999";
+      cell.appendChild(dot);
+    }
+
+    if(list.every(t=>t.completed)) cell.style.background="#dfffe1";
   });
 }
 
 // =====================
-// SIDEBAR (Hoy) with filters
+// SIDEBAR HOY
 // =====================
 function renderSidebar(){
-  sidebarList.innerHTML = "";
-  const todayKey = formatDateYMD(new Date());
-  const list = tasks[todayKey] || [];
-  // filter according to currentFilter
-  const filtered = list.filter(t => {
-    if(currentFilter === 'all') return true;
-    if(currentFilter === 'pending') return !t.completed;
-    if(currentFilter === 'completed') return t.completed;
-  });
-  filtered.forEach((t, i) => {
-    const li = document.createElement('li');
-    li.innerText = t.text;
-    li.style.borderLeftColor = t.color || '#999';
-    if(t.completed) li.classList.add('completed');
-    // click to open modal for today
-    li.addEventListener('click', ()=> openDayModal(todayKey));
-    sidebarList.appendChild(li);
-  });
-  // show placeholder if none
-  if(filtered.length === 0){
-    const p = document.createElement('p');
-    p.className = 'small-muted';
-    p.innerText = 'No hay tareas para hoy con este filtro.';
-    sidebarList.appendChild(p);
-  }
-}
+  sidebarList.innerHTML="";
+  let today=formatDateYMD(new Date());
+  let list=tasks[today]||[];
 
-// filter button handlers
-filterAllBtn.addEventListener('click', ()=> { setFilter('all'); });
-filterPendingBtn.addEventListener('click', ()=> { setFilter('pending'); });
-filterCompletedBtn.addEventListener('click', ()=> { setFilter('completed'); });
+  let filtered=list.filter(t=>currentFilter=="all"|| (currentFilter=="pending"&&!t.completed) || (currentFilter=="completed"&&t.completed));
 
-function setFilter(f){
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  if(f === 'all') filterAllBtn.classList.add('active');
-  if(f === 'pending') filterPendingBtn.classList.add('active');
-  if(f === 'completed') filterCompletedBtn.classList.add('active');
-  renderSidebar();
-}
-
-// =====================
-// DAY MODAL: abrir / render / agregar / subtareas / editar / borrar
-// =====================
-function openDayModal(dateKey){
-  selectedDayKey = dateKey;
-  const [y, m, d] = dateKey.split('-').map(Number);
-  modalDateTitle.innerText = `Tareas del ${d} de ${months[m-1]} ${y}`;
-  taskInput.value = '';
-  subTaskInput.value = '';
-  addSubTaskBtn.disabled = true;
-  renderTaskListForDay();
-  taskModal.setAttribute('aria-hidden','false');
-  taskModal.style.display = 'flex';
-}
-
-closeModal.onclick = () => {
-  taskModal.setAttribute('aria-hidden','true');
-  taskModal.style.display = 'none';
-  selectedDayKey = null;
-};
-
-// render list in modal
-function renderTaskListForDay(){
-  taskListForDay.innerHTML = '';
-  const list = tasks[selectedDayKey] || [];
-  list.forEach((task, idx) => {
-    const li = document.createElement('li');
-    li.style.borderLeftColor = task.color || '#999';
-    // checkbox main
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.checked = task.completed;
-    cb.className = 'task-checkbox';
-    cb.onchange = () => {
-      task.completed = cb.checked;
-      // animation toggle
-      if(task.completed) li.classList.add('animate-complete');
-      else li.classList.remove('animate-complete');
-      saveTasks();
-      renderTaskListForDay();
-      renderSidebar();
-      renderCalendarIndicators();
-    };
-    li.appendChild(cb);
-
-    // text
-    const span = document.createElement('span');
-    span.className = 'task-text' + (task.completed ? ' completed' : '');
-    span.innerText = task.text;
-    li.appendChild(span);
-
-    // actions: edit, delete, add sub
-    const actions = document.createElement('div');
-    actions.className = 'task-actions';
-
-    const editBtn = document.createElement('button');
-    editBtn.innerText = '✎';
-    editBtn.onclick = () => openEditModal(selectedDayKey, idx);
-    actions.appendChild(editBtn);
-
-    const addSubBtn = document.createElement('button');
-    addSubBtn.innerText = '➕sub';
-    addSubBtn.onclick = () => {
-      const subText = prompt('Texto de la subtarea:');
-      if(!subText) return;
-      if(!task.subtasks) task.subtasks = [];
-      task.subtasks.push({ text: subText, completed: false });
-      saveTasks();
-      renderTaskListForDay();
-    };
-    actions.appendChild(addSubBtn);
-
-    const delBtn = document.createElement('button');
-    delBtn.innerText = '✕';
-    delBtn.onclick = () => {
-      if(!confirm('Eliminar tarea?')) return;
-      tasks[selectedDayKey].splice(idx,1);
-      if(tasks[selectedDayKey].length === 0) delete tasks[selectedDayKey];
-      saveTasks();
-      renderTaskListForDay();
-      renderCalendar();
-      renderSidebar();
-    };
-    actions.appendChild(delBtn);
-
-    li.appendChild(actions);
-
-    // subtasks
-    if(task.subtasks && task.subtasks.length){
-      const subUl = document.createElement('ul');
-      subUl.className = 'subtask-list';
-      task.subtasks.forEach((sub, sidx) => {
-        const subLi = document.createElement('li');
-        const subCb = document.createElement('input');
-        subCb.type = 'checkbox';
-        subCb.checked = sub.completed;
-        subCb.onchange = () => {
-          sub.completed = subCb.checked;
-          // if all subtasks done, optionally mark main completed
-          if(task.subtasks.every(st => st.completed)) task.completed = true;
-          else task.completed = false;
-          saveTasks();
-          renderTaskListForDay();
-          renderSidebar();
-          renderCalendarIndicators();
-        };
-        subLi.appendChild(subCb);
-
-        const subSpan = document.createElement('span');
-        subSpan.innerText = sub.text;
-        if(sub.completed) subSpan.classList.add('completed');
-        subLi.appendChild(subSpan);
-
-        const subDel = document.createElement('button');
-        subDel.innerText = '✕';
-        subDel.onclick = () => {
-          if(!confirm('Eliminar subtarea?')) return;
-          task.subtasks.splice(sidx,1);
-          saveTasks();
-          renderTaskListForDay();
-        };
-        subLi.appendChild(subDel);
-
-        // edit subtask
-        const subEdit = document.createElement('button');
-        subEdit.innerText = '✎';
-        subEdit.onclick = () => {
-          const newText = prompt('Editar subtarea', sub.text);
-          if(newText && newText.trim()){
-            sub.text = newText.trim();
-            saveTasks();
-            renderTaskListForDay();
-          }
-        };
-        subLi.appendChild(subEdit);
-
-        subUl.appendChild(subLi);
-      });
-      li.appendChild(subUl);
-    }
-
-    taskListForDay.appendChild(li);
-  });
-
-  // enable add-sub controls only if there are pending tasks
-  const hasPending = (tasks[selectedDayKey] || []).some(t => !t.completed);
-  addSubTaskBtn.disabled = !hasPending;
-  subTaskInput.disabled = !hasPending;
-}
-
-// ADD main task for selected day
-addTaskBtn.onclick = () => {
-  const text = taskInput.value.trim();
-  if(!text || !selectedDayKey) return;
-  if(!tasks[selectedDayKey]) tasks[selectedDayKey] = [];
-  tasks[selectedDayKey].push({
-    text,
-    color: taskColorInput.value || '#6699ff',
-    completed: false,
-    subtasks: []
-  });
-  taskInput.value = '';
-  saveTasks();
-  renderTaskListForDay();
-  renderCalendarIndicators();
-  renderSidebar();
-};
-
-// ADD subtask (adds to first pending task) — keeps previous behaviour: adds to last pending
-addSubTaskBtn.onclick = () => {
-  const subText = subTaskInput.value.trim();
-  if(!subText || !selectedDayKey) return;
-  const list = tasks[selectedDayKey] || [];
-  const target = list.slice().reverse().find(t => !t.completed);
-  if(!target){
-    alert('No hay tarea pendiente para añadir subtarea.');
+  if(filtered.length===0){
+    sidebarList.innerHTML=`<p class="empty-text">No hay tareas para hoy</p>`;
     return;
   }
-  if(!target.subtasks) target.subtasks = [];
-  target.subtasks.push({ text: subText, completed: false });
-  subTaskInput.value = '';
-  saveTasks();
-  renderTaskListForDay();
-  renderCalendarIndicators();
-};
 
-// =====================
-// EDIT TASK modal
-// =====================
-function openEditModal(dayKey, taskIndex){
-  editing.dayKey = dayKey;
-  editing.taskIndex = taskIndex;
-  const t = tasks[dayKey][taskIndex];
-  editText.value = t.text;
-  editColor.value = t.color || '#6699ff';
-  // set date input (yyyy-mm-dd)
-  editDate.value = dayKey;
-  editCompleted.checked = !!t.completed;
-
-  editModal.setAttribute('aria-hidden','false');
-  editModal.style.display = 'flex';
+  filtered.forEach(t=>{
+    let li=document.createElement("li");
+    li.innerText=t.text;
+    li.style.borderLeft=`4px solid ${t.color}`;
+    if(t.completed) li.classList.add("completed");
+    li.onclick=()=>openDayModal(today);
+    sidebarList.appendChild(li);
+  });
 }
-cancelEdit.onclick = () => { editModal.setAttribute('aria-hidden','true'); editModal.style.display = 'none'; editing = { dayKey:null, taskIndex:null }; };
 
-saveEdit.onclick = () => {
-  if(!editing.dayKey) return;
-  const t = tasks[editing.dayKey][editing.taskIndex];
-  t.text = editText.value.trim() || t.text;
-  t.color = editColor.value;
-  t.completed = editCompleted.checked;
-  const newDateKey = editDate.value || editing.dayKey;
-
-  // if date changed, move task
-  if(newDateKey !== editing.dayKey){
-    // remove from old
-    const moved = tasks[editing.dayKey].splice(editing.taskIndex,1)[0];
-    if(tasks[editing.dayKey].length === 0) delete tasks[editing.dayKey];
-    // push to new date
-    if(!tasks[newDateKey]) tasks[newDateKey] = [];
-    tasks[newDateKey].push(moved);
-  }
-  saveTasks();
-  editModal.setAttribute('aria-hidden','true');
-  editModal.style.display = 'none';
-  editing = { dayKey:null, taskIndex:null };
-  // refresh views
-  renderTaskListForDay();
-  renderCalendar();
+// filtros
+filterAllBtn.onclick=()=>setFilter("all");
+filterPendingBtn.onclick=()=>setFilter("pending");
+filterCompletedBtn.onclick=()=>setFilter("completed");
+function setFilter(f){ currentFilter=f; document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+  if(f=="all")filterAllBtn.classList.add("active");
+  if(f=="pending")filterPendingBtn.classList.add("active");
+  if(f=="completed")filterCompletedBtn.classList.add("active");
   renderSidebar();
+}
+
+// =====================
+// MODAL DÍA
+// =====================
+function openDayModal(key){
+  selectedDayKey=key;
+  const [y,m,d]=key.split("-");
+  modalDateTitle.innerHTML=`${d} ${months[m-1]} ${y}`;
+  taskModal.style.display="flex";
+  renderTaskListForDay();
+}
+closeModal.onclick=()=>taskModal.style.display="none";
+
+function renderTaskListForDay(){
+  taskListForDay.innerHTML="";
+  let list=tasks[selectedDayKey]||[];
+
+  list.forEach((task,i)=>{
+    let el=document.createElement("li");
+    el.style.borderLeft=`4px solid ${task.color}`;
+
+    let cb=document.createElement("input");
+    cb.type="checkbox"; cb.checked=task.completed;
+    cb.onchange=()=>{ task.completed=cb.checked; saveTasks(); renderTaskListForDay(); renderSidebar(); };
+    el.append(cb);
+
+    let text=document.createElement("span");
+    text.innerText=task.text;
+    if(task.completed)text.classList.add("completed");
+    el.append(text);
+
+    let actions=document.createElement("div");
+    actions.className="task-actions";
+
+    let edit=document.createElement("button"); edit.innerText="✎"; edit.onclick=()=>openEditModal(selectedDayKey,i);
+    let sub=document.createElement("button"); sub.innerText="+sub"; sub.onclick=()=>addSubManual(i);
+    let del=document.createElement("button"); del.innerText="✕"; del.onclick=()=>deleteTask(i);
+
+    actions.append(edit,sub,del); el.append(actions);
+    if(task.subtasks) renderSubtasks(el,task,i);
+
+    taskListForDay.append(el);
+  });
+}
+
+function addSubManual(i){
+  let text=prompt("Subtarea:");
+  if(!text)return;
+  if(!tasks[selectedDayKey][i].subtasks)tasks[selectedDayKey][i].subtasks=[];
+  tasks[selectedDayKey][i].subtasks.push({text,completed:false});
+  saveTasks(); renderTaskListForDay();
+}
+
+function deleteTask(i){
+  if(confirm("Eliminar tarea?")){
+    tasks[selectedDayKey].splice(i,1);
+    if(tasks[selectedDayKey].length===0) delete tasks[selectedDayKey];
+    saveTasks(); renderTaskListForDay(); renderCalendar();
+  }
+}
+
+function renderSubtasks(base,task,i){
+  let ul=document.createElement("ul");
+  task.subtasks.forEach((s,n)=>{
+    let li=document.createElement("li");
+
+    let cb=document.createElement("input");
+    cb.type="checkbox"; cb.checked=s.completed;
+    cb.onchange=()=>{ s.completed=cb.checked; saveTasks(); renderTaskListForDay(); };
+    li.append(cb);
+
+    let text=document.createElement("span");
+    text.innerText=s.text; if(s.completed)text.classList.add("completed");
+    li.append(text);
+
+    let del=document.createElement("button");
+    del.innerText="✕"; del.onclick=()=>{ task.subtasks.splice(n,1); saveTasks(); renderTaskListForDay(); };
+    li.append(del);
+    ul.append(li);
+  });
+  base.append(ul);
+}
+
+// =====================
+// AÑADIR TAREAS
+// =====================
+addTaskBtn.onclick=()=>{
+  let text=taskInput.value.trim(); if(!text)return;
+  if(!tasks[selectedDayKey])tasks[selectedDayKey]=[];
+  tasks[selectedDayKey].push({text,color:taskColorInput.value,completed:false,subtasks:[]});
+  taskInput.value=""; saveTasks(); renderTaskListForDay(); renderCalendar();
 };
 
 // =====================
-// Calendar nav & helpers
+// EDITAR TAREA
 // =====================
-prevMonthBtn.addEventListener('click', ()=> { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); });
-nextMonthBtn.addEventListener('click', ()=> { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); });
-todayBtn.addEventListener('click', ()=> { currentDate = new Date(); renderCalendar(); });
+function openEditModal(key,i){
+  editing={dayKey:key,taskIndex:i};
+  let t=tasks[key][i];
+  editText.value=t.text;
+  editColor.value=t.color;
+  editDate.value=key;
+  editCompleted.checked=t.completed;
+  editModal.style.display="flex";
+}
+cancelEdit.onclick=()=>editModal.style.display="none";
 
-// quick open today
-document.getElementById('currentMonth').addEventListener('click', ()=> {
-  currentDate = new Date();
-  renderCalendar();
-});
+saveEdit.onclick=()=>{
+  let d=editing.dayKey,i=editing.taskIndex;
+  let t=tasks[d][i];
+  t.text=editText.value.trim();
+  t.color=editColor.value;
+  t.completed=editCompleted.checked;
+  let newDate=editDate.value;
+
+  if(newDate!==d){
+    let m=tasks[d].splice(i,1)[0];
+    if(tasks[d].length===0)delete tasks[d];
+    if(!tasks[newDate])tasks[newDate]=[];
+    tasks[newDate].push(m);
+  }
+
+  saveTasks(); renderCalendar(); renderSidebar(); editModal.style.display="none";
+};
+
+// navegación calendario
+prevMonthBtn.onclick=()=>{currentDate.setMonth(currentDate.getMonth()-1),renderCalendar()};
+nextMonthBtn.onclick=()=>{currentDate.setMonth(currentDate.getMonth()+1),renderCalendar()};
+todayBtn.onclick=()=>{currentDate=new Date(),renderCalendar()};
+
 
 // =====================
-// Spotify embed loader (simple embed)
+// SPOTIFY
 // =====================
-document.getElementById('loadSpotify').addEventListener('click', ()=> {
-  let url = document.getElementById('spotifyInput').value.trim();
-  if(!url.includes('spotify')) { alert('Enlace inválido'); return; }
-  // normalize and build embed
-  url = url.replace('https://open.spotify.com/intl-es/', 'https://open.spotify.com/');
-  const embed = url.replace('open.spotify.com/', 'open.spotify.com/embed/').split('?')[0];
-  document.getElementById('spotifyPlayer').innerHTML = `<iframe src="${embed}" frameborder="0" allow="encrypted-media" style="width:100%;height:80px"></iframe>`;
-});
+document.getElementById("loadSpotify").onclick=()=>{
+  let link=document.getElementById("spotifyInput").value.trim();
+  if(!link.includes("spotify"))return alert("Enlace no válido");
+  link=link.replace("open.spotify.com/","open.spotify.com/embed/");
+  document.getElementById("spotifyPlayer").innerHTML=`<iframe src="${link}" width="100%" height="95" frameborder="0" allow="encrypted-media"></iframe>`;
+};
+
 
 // =====================
-// GRÁFICAS (Chart.js) - creación y actualización
+// GRÁFICAS Chart.js
 // =====================
-
 function updateCharts(){
-  // Destroy previous instances if exist
-  if(dailyChartInstance) { dailyChartInstance.destroy(); dailyChartInstance = null; }
-  if(monthlyDoughnutInstance) { monthlyDoughnutInstance.destroy(); monthlyDoughnutInstance = null; }
-  if(monthlyLineInstance) { monthlyLineInstance.destroy(); monthlyLineInstance = null; }
-  if(monthlyBarInstance) { monthlyBarInstance.destroy(); monthlyBarInstance = null; }
+  if(dailyChartInstance)dailyChartInstance.destroy();
+  if(monthlyDoughnutInstance)monthlyDoughnutInstance.destroy();
+  if(monthlyLineInstance)monthlyLineInstance.destroy();
+  if(monthlyBarInstance)monthlyBarInstance.destroy();
 
-  // 1) DAILY BAR: total vs completadas del día seleccionado (si modal abierto usa selectedDayKey, sino usa hoy)
-  const activeDayKey = selectedDayKey || formatDateYMD(new Date());
-  const dayList = tasks[activeDayKey] || [];
-  const dayTotal = dayList.length;
-  const dayCompleted = dayList.filter(t=>t.completed).length;
-  const dayPending = dayTotal - dayCompleted;
+  let activeDay=selectedDayKey||formatDateYMD(new Date());
+  let list=tasks[activeDay]||[];
+  let comp=list.filter(t=>t.completed).length;
+  let pend=list.length-comp;
 
-  const dailyCtx = document.getElementById('dailyProgressChart').getContext('2d');
-  dailyChartInstance = new Chart(dailyCtx, {
-    type: 'bar',
-    data: {
-      labels: ['Completadas', 'Pendientes'],
-      datasets: [{
-        label: 'Tareas',
-        data: [dayCompleted, dayPending],
-        backgroundColor: ['#4CAF50', '#F44336']
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: { y: { beginAtZero:true, precision:0, ticks: { stepSize: 1 } } },
-      plugins: { legend: { display:false }, title: { display:true, text: `Progreso del día (${activeDayKey})` } }
+  // Día gráfico barra
+  dailyChartInstance=new Chart(document.getElementById("dailyProgressChart"),{
+    type:"bar",
+    data:{labels:["Completadas","Pendientes"],datasets:[{data:[comp,pend],backgroundColor:["#4caf50","#ff9c32"]}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+  });
+
+  // Porcentaje mensual Aquí: 👇 Resume todas las tareas del mes visible
+  let y=currentDate.getFullYear(),m=currentDate.getMonth()+1;
+  let total=0,done=0;
+
+  Object.keys(tasks).forEach(k=>{
+    if(k.startsWith(`${y}-${String(m).padStart(2,"0")}`)){
+      total+=tasks[k].length;
+      done+=tasks[k].filter(x=>x.completed).length;
     }
   });
 
-  // 2) MONTHLY DOUGHNUT: total completadas vs pendientes en el mes actual
-  const { monthLabels, monthCompletedCount, monthPendingCount } = aggregateMonthCounts(currentDate);
-  const totalCompletedMonth = monthCompletedCount.reduce((a,b)=>a+b,0);
-  const totalPendingMonth = monthPendingCount.reduce((a,b)=>a+b,0);
-
-  const doughCtx = document.getElementById('monthlyDoughnutChart').getContext('2d');
-  monthlyDoughnutInstance = new Chart(doughCtx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Completadas', 'Pendientes'],
-      datasets: [{ data: [totalCompletedMonth, totalPendingMonth], backgroundColor: ['#4CAF50', '#F44336'] }]
-    },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ title:{ display:true, text: 'Resumen mensual' } } }
+  monthlyDoughnutInstance=new Chart(document.getElementById("monthlyDoughnutChart"),{
+    type:"doughnut",
+    data:{labels:["Completadas","No completadas"],datasets:[{data:[done,total-done],backgroundColor:["#4caf50","#ce4444"]}]},
+    options:{responsive:true}
   });
 
-  // 3) MONTHLY LINE: % completado por día del mes (tendencia)
-  const lineCtx = document.getElementById('monthlyLineChart').getContext('2d');
-  const percentPerDay = monthLabels.map((label, i)=>{
-    const total = monthCompletedCount[i] + monthPendingCount[i];
-    return total ? Math.round((monthCompletedCount[i]/total)*100) : 0;
-  });
-  monthlyLineInstance = new Chart(lineCtx, {
-    type: 'line',
-    data: { labels: monthLabels, datasets: [{ label: '% completado', data: percentPerDay, borderColor: '#6699ff', tension:0.25, fill:false }] },
-    options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ min:0, max:100 } }, plugins:{ title:{ display:true, text: 'Tendencia mensual (% completado)' } } }
-  });
-
-  // 4) MONTHLY BAR: tareas totales por día (resumen tipo 3/4)
-  const barCtx = document.getElementById('monthlyBarChart').getContext('2d');
-  const totalsPerDay = monthLabels.map((_,i) => monthCompletedCount[i] + monthPendingCount[i]);
-  monthlyBarInstance = new Chart(barCtx, {
-    type: 'bar',
-    data: { labels: monthLabels, datasets: [{ label:'Tareas totales', data: totalsPerDay, backgroundColor: '#6699ff' }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ title:{ display:true, text:'Tareas por día (mes actual)' } }, scales:{ y:{ beginAtZero:true, precision:0 } } }
-  });
 }
-
-// Helper: aggregate counts for the current month
-function aggregateMonthCounts(dateRef){
-  const year = dateRef.getFullYear();
-  const month = dateRef.getMonth() + 1; // 1..12
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const labels = [];
-  const completedCounts = [];
-  const pendingCounts = [];
-
-  for(let d=1; d<=daysInMonth; d++){
-    const key = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    labels.push(String(d));
-    const list = tasks[key] || [];
-    const c = list.filter(t=>t.completed).length;
-    const p = list.length - c;
-    completedCounts.push(c);
-    pendingCounts.push(p);
-  }
-  return { monthLabels: labels, monthCompletedCount: completedCounts, monthPendingCount: pendingCounts };
-}
-
-// =====================
-// Init: load and render
-// =====================
-loadTasks();
+updateCharts();
 renderCalendar();
 renderSidebar();
-setFilter('all');
-updateCharts();
-
-// Expose small helpers for debug
-window.openDayModal = openDayModal;
