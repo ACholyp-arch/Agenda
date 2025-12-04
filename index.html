@@ -5,115 +5,145 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Ser o no ser</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- Chart.js CDN -->
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-  <aside id="taskSidebar">
-    <h3>Tareas de Hoy</h3>
+<div id="layout">
+    
+    <!-- ░░░ LADO IZQUIERDO – HOY ░░░ -->
+    <aside id="taskSidebar">
+      <h3>📅 Tareas del día</h3>
 
-    <div class="filter-row">
-      <button id="filterAll" class="filter-btn active">Todas</button>
-      <button id="filterPending" class="filter-btn">Pendientes</button>
-      <button id="filterCompleted" class="filter-btn">Completadas</button>
-    </div>
-
-    <ul id="taskListToday"></ul>
-  </aside>
-
-  <main>
-    <header>
-      <h1>Ser o no ser</h1>
-      <div class="month-row">
-        <button id="prevMonth">◀</button>
-        <div id="currentMonth"></div>
-        <button id="nextMonth">▶</button>
-        <button id="todayBtn" class="small">Hoy</button>
+      <div class="filter-row">
+        <button id="filterAll" class="filter-btn active">Todas</button>
+        <button id="filterPending" class="filter-btn">Pendientes</button>
+        <button id="filterCompleted" class="filter-btn">Completadas</button>
       </div>
-    </header>
 
-    <!-- DASHBOARD: aquí van las gráficas -->
-    <section id="progressDashboard">
-      <div class="charts-grid">
-        <div class="chart-card">
-          <h4>Progreso del día</h4>
-          <canvas id="dailyProgressChart"></canvas>
-        </div>
+      <ul id="taskListToday"></ul>
+    </aside>
 
-        <div class="chart-card">
-          <h4>Resumen mensual (rosquilla)</h4>
-          <canvas id="monthlyDoughnutChart"></canvas>
-        </div>
 
-        <div class="chart-card">
-          <h4>Tendencia mensual (línea)</h4>
-          <canvas id="monthlyLineChart"></canvas>
-        </div>
 
-        <div class="chart-card">
-          <h4>Resumen por día (barra)</h4>
-          <canvas id="monthlyBarChart"></canvas>
+    <!-- ░░░ CENTRO – CALENDARIO + DASHBOARD ░░░ -->
+    <main>
+
+      <header>
+        <h1>Ser o no ser</h1>
+
+        <div class="month-row">
+          <button id="prevMonth">◀</button>
+          <div id="currentMonth"></div>
+          <button id="nextMonth">▶</button>
+          <button id="todayBtn" class="small">Hoy</button>
         </div>
-      </div>
+      </header>
+
+
+      <!-- 📊 DASHBOARD → 4 gráficas -->
+      <section id="progressDashboard">
+        <div class="charts-grid">
+
+          <div class="chart-card">
+            <h4>Progreso del día</h4>
+            <canvas id="dailyProgressChart"></canvas>
+          </div>
+
+          <div class="chart-card">
+            <h4>Resumen mensual</h4>
+            <canvas id="monthlyDoughnutChart"></canvas>
+          </div>
+
+          <div class="chart-card">
+            <h4>Tendencia mensual</h4>
+            <canvas id="monthlyLineChart"></canvas>
+          </div>
+
+          <div class="chart-card">
+            <h4>Resumen por día</h4>
+            <canvas id="monthlyBarChart"></canvas>
+          </div>
+
+        </div>
+      </section>
+
+
+      <section id="calendarContainer">
+        <div id="calendar"></div>
+      </section>
+
+    </main>
+
+
+
+    <!-- ░░░ DERECHA – SPOTIFY ░░░ -->
+    <section id="spotifySection">
+      <h3>🎧 Mi música</h3>
+
+      <input id="spotifyInput" type="text" placeholder="Link Spotify playlist/track">
+      <button id="loadSpotify">Cargar</button>
+
+      <div id="spotifyPlayer"></div>
     </section>
 
-    <section id="calendarContainer">
-      <div id="calendar"></div>
-    </section>
-  </main>
+</div>
 
-  <section id="spotifySection">
-    <h3>Mi música</h3>
-    <input id="spotifyInput" type="text" placeholder="Pega un enlace de Spotify">
-    <button id="loadSpotify">Cargar Spotify</button>
-    <div id="spotifyPlayer"></div>
-  </section>
 
-  <!-- MODAL DÍA (Añadir / ver / editar tareas del día) -->
-  <div id="taskModal" class="modal" aria-hidden="true">
-    <div class="modal-content">
-      <h3 id="modalDateTitle">Tareas</h3>
 
-      <label>Color de tarea: <input type="color" id="taskColorInput" value="#6699ff"></label>
+<!-- MODAL PARA VER / EDITAR / AGREGAR TAREAS -->
+<div id="taskModal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <h3 id="modalDateTitle">Tareas</h3>
 
-      <div class="input-row">
-        <input id="taskInput" type="text" placeholder="Escribe una tarea principal...">
-        <button id="addTaskBtn" class="primary">Agregar</button>
-      </div>
+    <label>
+      Color: <input type="color" id="taskColorInput" value="#6699ff">
+    </label>
 
-      <div class="input-row subtask-inline">
-        <input id="subTaskInput" type="text" placeholder="Añadir subtarea (selecciona tarea primero)">
-        <button id="addSubTaskBtn" disabled>➕ Sub</button>
-      </div>
+    <div class="input-row">
+      <input id="taskInput" type="text" placeholder="Tarea principal...">
+      <button id="addTaskBtn" class="primary">Agregar</button>
+    </div>
 
-      <ul id="taskListForDay"></ul>
+    <div class="input-row subtask-inline">
+      <input id="subTaskInput" type="text" placeholder="Subtarea...">
+      <button id="addSubTaskBtn">➕ sub</button>
+    </div>
 
-      <div class="modal-actions">
-        <button id="closeModal">Cerrar</button>
-      </div>
+    <ul id="taskListForDay"></ul>
+
+    <div class="modal-actions">
+      <button id="closeModal">Cerrar</button>
     </div>
   </div>
+</div>
 
-  <!-- EDIT TASK MODAL -->
-  <div id="editModal" class="modal" aria-hidden="true">
-    <div class="modal-content">
-      <h3>Editar tarea</h3>
-      <input id="editText" type="text" placeholder="Texto de la tarea">
-      <div class="input-row">
-        <label>Color: <input id="editColor" type="color"></label>
-        <label>Fecha: <input id="editDate" type="date"></label>
-      </div>
-      <div class="input-row">
-        <label><input id="editCompleted" type="checkbox"> Completada</label>
-      </div>
-      <div class="modal-actions">
-        <button id="cancelEdit">Cancelar</button>
-        <button id="saveEdit" class="primary">Guardar</button>
-      </div>
+
+
+<!-- MODAL EDITAR TAREA -->
+<div id="editModal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <h3>Editar tarea</h3>
+
+    <input id="editText" type="text" placeholder="Texto">
+
+    <div class="input-row">
+      <label>Color: <input id="editColor" type="color"></label>
+      <label>Fecha: <input id="editDate" type="date"></label>
+    </div>
+
+    <label><input id="editCompleted" type="checkbox"> Completada</label>
+
+    <div class="modal-actions">
+      <button id="cancelEdit">Cancelar</button>
+      <button id="saveEdit" class="primary">Guardar</button>
     </div>
   </div>
+</div>
 
-  <script src="script.js"></script>
+
+<script src="script.js"></script>
 </body>
 </html>
