@@ -13,14 +13,14 @@
 
 <div id="layout">
     
-    <!-- ░░░ LADO IZQUIERDO – HOY ░░░ -->
+    <!-- ░░░ LADO IZQUIERDO — HOY ░░░ -->
     <aside id="taskSidebar">
       <h3>📅 Tareas del día</h3>
 
       <div class="filter-row">
-        <button id="filterAll" class="filter-btn active">Todas</button>
-        <button id="filterPending" class="filter-btn">Pendientes</button>
-        <button id="filterCompleted" class="filter-btn">Completadas</button>
+        <button class="filter-btn active" data-filter="all">Todas</button>
+        <button class="filter-btn" data-filter="pending">Pendientes</button>
+        <button class="filter-btn" data-filter="completed">Completadas</button>
       </div>
 
       <ul id="taskListToday"></ul>
@@ -28,7 +28,7 @@
 
 
 
-    <!-- ░░░ CENTRO – CALENDARIO + DASHBOARD ░░░ -->
+    <!-- ░░░ CENTRO – CALENDARIO Y DASHBOARD ░░░ -->
     <main>
 
       <header>
@@ -43,7 +43,7 @@
       </header>
 
 
-      <!-- 📊 DASHBOARD → 4 gráficas -->
+      <!-- 📊 DASHBOARD EMOCIONAL -->
       <section id="progressDashboard">
         <div class="charts-grid">
 
@@ -58,8 +58,8 @@
           </div>
 
           <div class="chart-card">
-            <h4>Tendencia mensual</h4>
-            <canvas id="monthlyLineChart"></canvas>
+            <h4>Tendencia emocional</h4>
+            <canvas id="emotionalChart"></canvas>
           </div>
 
           <div class="chart-card">
@@ -79,11 +79,11 @@
 
 
 
-    <!-- ░░░ DERECHA – SPOTIFY ░░░ -->
+    <!-- ░░░ DERECHA — SPOTIFY ░░░ -->
     <section id="spotifySection">
       <h3>🎧 Mi música</h3>
 
-      <input id="spotifyInput" type="text" placeholder="Link Spotify playlist/track">
+      <input id="spotifyInput" type="text" placeholder="Link playlist o track">
       <button id="loadSpotify">Cargar</button>
 
       <div id="spotifyPlayer"></div>
@@ -93,15 +93,45 @@
 
 
 
-<!-- MODAL PARA VER / EDITAR / AGREGAR TAREAS -->
+
+
+<!-- ╔══════════════════════════════╗ -->
+<!--     🟦 MODAL AGREGAR TAREAS     -->
+<!-- ╚══════════════════════════════╝ -->
 <div id="taskModal" class="modal" aria-hidden="true">
   <div class="modal-content">
     <h3 id="modalDateTitle">Tareas</h3>
 
-    <label>
-      Color: <input type="color" id="taskColorInput" value="#6699ff">
-    </label>
 
+    <!-- COLOR Y PRIORIDAD -->
+    <div class="settings-row">
+      <label>🎨 Color: <input type="color" id="taskColorInput" value="#6699ff"></label>
+
+      <label>Categoría:
+        <select id="taskCategory">
+          <option value="normal">Normal</option>
+          <option value="importante">Importante</option>
+          <option value="urgente">Urgente</option>
+          <option value="personal">Personal</option>
+        </select>
+      </label>
+    </div>
+
+
+    <!-- REPETICIÓN DINÁMICA -->
+    <label>Repetir tarea:</label>
+    <div class="repeat-box">
+      <label><input type="checkbox" value="Lunes" class="repeat-day">L</label>
+      <label><input type="checkbox" value="Martes" class="repeat-day">M</label>
+      <label><input type="checkbox" value="Miércoles" class="repeat-day">X</label>
+      <label><input type="checkbox" value="Jueves" class="repeat-day">J</label>
+      <label><input type="checkbox" value="Viernes" class="repeat-day">V</label>
+      <label><input type="checkbox" value="Sábado" class="repeat-day">S</label>
+      <label><input type="checkbox" value="Domingo" class="repeat-day">D</label>
+    </div>
+
+
+    <!-- INPUT PRINCIPAL + SUBTAREAS -->
     <div class="input-row">
       <input id="taskInput" type="text" placeholder="Tarea principal...">
       <button id="addTaskBtn" class="primary">Agregar</button>
@@ -109,7 +139,7 @@
 
     <div class="input-row subtask-inline">
       <input id="subTaskInput" type="text" placeholder="Subtarea...">
-      <button id="addSubTaskBtn">➕ sub</button>
+      <button id="addSubTaskBtn">➕ Sub</button>
     </div>
 
     <ul id="taskListForDay"></ul>
@@ -122,12 +152,18 @@
 
 
 
-<!-- MODAL EDITAR TAREA -->
+
+
+<!-- ╔══════════════════════════════╗ -->
+<!--         🔧 MODAL EDITAR         -->
+<!-- ╚══════════════════════════════╝ -->
 <div id="editModal" class="modal" aria-hidden="true">
   <div class="modal-content">
     <h3>Editar tarea</h3>
 
-    <input id="editText" type="text" placeholder="Texto">
+    <label>Texto:
+      <input id="editText" type="text">
+    </label>
 
     <div class="input-row">
       <label>Color: <input id="editColor" type="color"></label>
