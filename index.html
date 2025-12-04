@@ -5,15 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Ser o no ser</title>
   <link rel="stylesheet" href="styles.css">
-
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
 <div id="layout">
-    
-    <!-- ░░░ LADO IZQUIERDO — HOY ░░░ -->
+
+    <!-- ░░░ LADO IZQUIERDO – HOY ░░░ -->
     <aside id="taskSidebar">
       <h3>📅 Tareas del día</h3>
 
@@ -27,8 +26,7 @@
     </aside>
 
 
-
-    <!-- ░░░ CENTRO – CALENDARIO Y DASHBOARD ░░░ -->
+    <!-- ░░░ CENTRO — CALENDARIO + GRÁFICAS ░░░ -->
     <main>
 
       <header>
@@ -43,8 +41,8 @@
       </header>
 
 
-      <!-- 📊 DASHBOARD EMOCIONAL -->
       <section id="progressDashboard">
+
         <div class="charts-grid">
 
           <div class="chart-card">
@@ -68,6 +66,7 @@
           </div>
 
         </div>
+
       </section>
 
 
@@ -79,13 +78,12 @@
 
 
 
-    <!-- ░░░ DERECHA — SPOTIFY ░░░ -->
+    <!-- ░░░ DERECHA – SPOTIFY ░░░ -->
     <section id="spotifySection">
       <h3>🎧 Mi música</h3>
 
       <input id="spotifyInput" type="text" placeholder="Link playlist o track">
       <button id="loadSpotify">Cargar</button>
-
       <div id="spotifyPlayer"></div>
     </section>
 
@@ -94,16 +92,15 @@
 
 
 
-
-<!-- ╔══════════════════════════════╗ -->
-<!--     🟦 MODAL AGREGAR TAREAS     -->
-<!-- ╚══════════════════════════════╝ -->
+<!-- ╔══════════════════════════════════╗ -->
+<!--        🟣 MODAL AGREGAR TAREAS      -->
+<!-- ╚══════════════════════════════════╝ -->
 <div id="taskModal" class="modal" aria-hidden="true">
   <div class="modal-content">
     <h3 id="modalDateTitle">Tareas</h3>
 
 
-    <!-- COLOR Y PRIORIDAD -->
+    <!-- COLOR + CATEGORÍA -->
     <div class="settings-row">
       <label>🎨 Color: <input type="color" id="taskColorInput" value="#6699ff"></label>
 
@@ -118,8 +115,8 @@
     </div>
 
 
-    <!-- REPETICIÓN DINÁMICA -->
-    <label>Repetir tarea:</label>
+    <!-- REPETICIÓN -->
+    <label>Repetir tarea por días:</label>
     <div class="repeat-box">
       <label><input type="checkbox" value="Lunes" class="repeat-day">L</label>
       <label><input type="checkbox" value="Martes" class="repeat-day">M</label>
@@ -131,7 +128,7 @@
     </div>
 
 
-    <!-- INPUT PRINCIPAL + SUBTAREAS -->
+    <!-- INPUTS -->
     <div class="input-row">
       <input id="taskInput" type="text" placeholder="Tarea principal...">
       <button id="addTaskBtn" class="primary">Agregar</button>
@@ -141,6 +138,7 @@
       <input id="subTaskInput" type="text" placeholder="Subtarea...">
       <button id="addSubTaskBtn">➕ Sub</button>
     </div>
+
 
     <ul id="taskListForDay"></ul>
 
@@ -153,10 +151,9 @@
 
 
 
-
-<!-- ╔══════════════════════════════╗ -->
-<!--         🔧 MODAL EDITAR         -->
-<!-- ╚══════════════════════════════╝ -->
+<!-- ╔══════════════════════════════════╗ -->
+<!--              ✏ EDITAR               -->
+<!-- ╚══════════════════════════════════╝ -->
 <div id="editModal" class="modal" aria-hidden="true">
   <div class="modal-content">
     <h3>Editar tarea</h3>
@@ -178,6 +175,7 @@
     </div>
   </div>
 </div>
+
 
 
 <script src="script.js"></script>
